@@ -1,0 +1,47 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissions required for the application to function -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+
+
+    <!-- Main application configuration -->
+    <application android:name="${applicationName}" android:extractNativeLibs="true" android:icon="@mipmap/ic_launcher" android:label="VPN MASTER">
+
+        <!-- The main activity that launches when the app starts -->
+        <activity android:name=".MainActivity" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:exported="true" android:hardwareAccelerated="true" android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchTheme" android:windowSoftInputMode="adjustResize">
+
+            <!-- Specifies the theme to use after the launch screen -->
+            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme"/>
+
+            <!-- Intent filter to make this the main entry point of the app -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Meta-data for Flutter embedding v2 -->
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
+
+        <!-- Google Mobile Ads Application ID -->
+        <!-- TODO: Replace the 'value' below with your actual AdMob Application ID from the AdMob console -->
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"/>
+
+        <!-- Service declaration for the OpenVPN core service -->
+        <service android:name="de.blinkt.openvpn.core.OpenVPNService" android:exported="true" android:permission="android.permission.BIND_VPN_SERVICE" tools:replace="android:exported"/>
+
+    </application>
+
+    <!-- Specifies the intents that the app can interact with -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

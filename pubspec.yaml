@@ -1,0 +1,111 @@
+name: winsguard
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+# The version of the application.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+
+# Application dependencies.
+dependencies:
+  rename: ^3.1.0
+  change_app_package_name: ^1.5.0
+  flutter:
+    sdk: flutter
+
+  intl: ^0.20.2
+  cupertino_icons: ^1.0.8
+
+  # UI & Animations
+  flutter_screenutil: ^5.9.3
+  flutter_native_splash: ^2.4.7
+  gap: ^3.0.1
+  google_fonts: ^8.0.2
+  flutter_svg: ^2.2.4
+  toastification: ^3.0.3
+  avatar_glow: ^3.0.1
+  bottom_bar: ^2.0.5
+  skeletonizer: ^2.1.3
+  syncfusion_flutter_gauges: ^32.2.8
+
+  # State Management & Utilities
+  flutter_bloc: ^9.1.1
+  flutter_hooks: ^0.21.3+1
+  get_it: ^9.2.1
+  equatable: ^2.0.8
+  dartz: ^0.10.1
+  logger: ^2.6.2
+
+  # Navigation
+  go_router: ^17.1.0
+
+  # Networking & Storage
+  dio: ^5.9.2
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
+
+  # Helpers And Services
+  csv: ^7.2.0
+  share_plus: ^12.0.1
+  url_launcher: ^6.3.2
+  webview_flutter: ^4.13.1
+  package_info_plus: ^9.0.0
+  oneconnect_flutter: ^1.0.5
+  flutter_internet_speed_test_pro: ^1.5.1
+
+  # Monetization (Unity LevelPlay mediation + Google UMP consent form)
+  unity_levelplay_mediation: ^9.3.0
+  google_mobile_ads: ^7.0.0
+
+
+dependency_overrides:
+    intl: ^0.20.2
+    package_info_plus: ^9.0.0
+
+# Dependencies for development and testing.
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  rename_app: ^1.6.5
+  change_app_package_name: ^1.5.0
+  flutter_launcher_icons: ^0.14.4
+
+
+# Configuration for the app's launcher icons.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/launcher_icon.png"
+  adaptive_icon_foreground: "assets/icons/launcher_icon.png"
+  adaptive_icon_background: "#3EB87C"
+
+
+# Configuration for the app's native splash screen.
+flutter_native_splash:
+  color: "#3EB87C"
+  image: assets/icons/splash_icon.png
+
+  android_12:
+    color: "#3EB87C"
+    image: assets/icons/splash_icon.png
+    icon_background_color: "#3EB87C"
+
+  fullscreen: true
+  android: true
+  ios: true
+
+
+# Flutter-specific configuration.
+flutter:
+  uses-material-design: true
+
+  # Asset declarations.
+  assets:
+    - assets/icons/
+    - assets/images/
+    - assets/flags/

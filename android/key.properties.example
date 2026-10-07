@@ -1,0 +1,11 @@
+# Copy this file to android/key.properties and fill in your own values.
+# key.properties and your keystore are git-ignored. Never share them.
+#
+# Create a keystore once (keep a backup, you cannot replace it later on Play Store):
+#   keytool -genkey -v -keystore ~/winsguard-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias winsguard
+#
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=winsguard
+# Absolute path, or a path relative to android/app/ (for example ../winsguard-release.jks)
+storeFile=/absolute/path/to/winsguard-release.jks

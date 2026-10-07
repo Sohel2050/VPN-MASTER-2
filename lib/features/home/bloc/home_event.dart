@@ -1,0 +1,65 @@
+import 'package:equatable/equatable.dart';
+import 'package:oneconnect_flutter/openvpn_flutter.dart';
+/// The base class for all events related to the home screen and VPN connection.
+sealed class HomeEvent extends Equatable{}
+
+/// Dispatched to initialize and start listening to VPN status and stage streams.
+class StartVpnTracking extends HomeEvent{
+  @override
+  List<Object?> get props => [];
+}
+
+/// Dispatched to check the current VPN connection status.
+class VpnConnectionStatus extends HomeEvent{
+  @override
+  List<Object?> get props => [];
+}
+
+/// Dispatched to connect to a VPN server.
+class ConnectVpn extends HomeEvent{
+  /// The OpenVPN configuration data.
+  final String config;
+  /// The name of the country for the server.
+  final String country;
+
+  /// Creates a [ConnectVpn] event.
+  ConnectVpn({
+    required this.config,
+    required this.country,
+  });
+
+  @override
+  List<Object?> get props => [
+    config,
+    country
+  ];
+}
+
+/// Dispatched to disconnect from the current VPN session.
+class DisconnectVpn extends HomeEvent{
+  @override
+  List<Object?> get props => [];
+}
+
+/// Dispatched internally to update the BLoC with the latest [VpnStatus].
+class TrackVpnStatus extends HomeEvent{
+  /// The latest status from the VPN service.
+  final VpnStatus? status;
+  /// Creates a [TrackVpnStatus] event.
+  TrackVpnStatus({required this.status});
+
+  @override
+  List<Object?> get props => [status];
+}
+
+
+/// Dispatched internally to update the BLoC with the latest [VPNStage].
+class TrackVpnStage extends HomeEvent{
+  /// The latest stage from the VPN service.
+  final VPNStage? stage;
+  /// Creates a [TrackVpnStage] event.
+  TrackVpnStage({required this.stage});
+
+  @override
+  List<Object?> get props => [stage];
+}

@@ -1,0 +1,56 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:winsguard/core/helpers/helpers.dart';
+import 'package:winsguard/features/home/bloc/home_bloc.dart';
+import 'package:winsguard/features/home/presentation/widgets/connection_statistic_widget.dart';
+import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:winsguard/features/servers/presentation/bloc/servers_bloc.dart';
+
+import '../../../../core/utils/styles/app_colors.dart';
+
+/// A widget that displays real-time connection statistics like download, upload, and ping.
+class ConnectionInfoWidget extends StatelessWidget {
+  /// Creates a [ConnectionInfoWidget].
+  const ConnectionInfoWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Displays the current download speed.
+            ConnectionStatisticWidget(
+              title: "Download",
+              value: Helpers.speedFromBitsPerSecond(
+                  int.parse(state.vpnStatus?.byteIn ?? "0")),
+              icon: Icons.arrow_downward_rounded,
+              backgroundColor: AppColors.primaryColor,
+            ),
+            // Displays the current upload speed.
+            ConnectionStatisticWidget(
+              title: "Upload",
+              value: Helpers.speedFromBitsPerSecond(
+                  int.parse(state.vpnStatus?.byteOut ?? "0")),
+              icon: Icons.arrow_upward_rounded,
+              backgroundColor: AppColors.greenColor,
+            ),
+            // Selects the currently chosen server from the ServersBloc to display its ping.
+            BlocSelector<ServersBloc, ServersState, VpnServerEntity?>(
+              selector: (state) => state.selectedServer,
+              builder: (context, vpnServer) {
+                return ConnectionStatisticWidget(
+                  title: "Ping",
+                  value: "${vpnServer?.ping ?? "0"} Ms",
+                  icon: Icons.bar_chart_rounded,
+                  backgroundColor: AppColors.deepOrange,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

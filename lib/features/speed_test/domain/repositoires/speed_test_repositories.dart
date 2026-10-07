@@ -1,0 +1,8 @@
+import 'package:dartz/dartz.dart';
+import 'package:winsguard/core/error/failure.dart';
+
+/// Abstract definition for the speed test repository.
+abstract class SpeedTestRepositories {
+  /// Fetches the ping time.
+  Future<Either<Failure, int>> getPing();
+}
