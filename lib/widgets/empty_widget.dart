@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/radius.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
 
 /// A reusable widget to display when a list or content is empty.
 class EmptyWidget extends StatelessWidget {

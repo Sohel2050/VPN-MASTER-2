@@ -1,5 +1,5 @@
 
-import 'package:winsguard/core/utils/enums/enums.dart';
+import 'package:vpn_master/core/utils/enums/enums.dart';
 
 extension StatusX on Status {
   bool get isInitial => this == Status.initial;

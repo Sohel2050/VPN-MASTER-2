@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
-import 'package:winsguard/core/constants/monetization_manager.dart';
-import 'package:winsguard/core/services/monetization/monetization_service.dart';
+import 'package:vpn_master/core/constants/monetization_manager.dart';
+import 'package:vpn_master/core/services/monetization/monetization_service.dart';
 
 /// Native ad (Unity LevelPlay) used inside the server list.
 /// It stays almost invisible until an ad is really loaded.

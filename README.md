@@ -1,4 +1,4 @@
-## Winsguard VPN Flutter App
+## VPN Master - Flutter VPN App
 
 This Flutter Android application provides secure VPN access using **OpenVPN** protocol and public VPN servers from **VPNGate**. It is designed for Android devices, with dynamic server selection, user-friendly controls, and privacy-focused features.
 
@@ -75,3 +75,10 @@ This Flutter Android application provides secure VPN access using **OpenVPN** pr
 
 ---
 # VPN-MASTER-2
+
+## VPN Master
+- App name: VPN Master, package/namespace: `com.albonik.vpnapp`
+- Logo: `assets/images/app_logo.png` (launcher/splash icons in `assets/icons/`)
+- Privacy Policy and Terms are shown inside the app (`lib/core/constants/legal_texts.dart`).
+  Hostable HTML copies are in `docs/` (use them for the Play Console privacy policy URL).
+- After changing icons run: `dart run flutter_launcher_icons` and `dart run flutter_native_splash:create`

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
 /// A data model for a VPN server.
 /// This class is used for data transfer and can be converted to a [VpnServerEntity].

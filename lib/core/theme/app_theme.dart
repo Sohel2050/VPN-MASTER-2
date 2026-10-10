@@ -1,5 +1,5 @@
-import 'package:winsguard/core/theme/dark_app_colors.dart';
-import 'package:winsguard/core/theme/light_app_colors.dart';
+import 'package:vpn_master/core/theme/dark_app_colors.dart';
+import 'package:vpn_master/core/theme/light_app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AppTheme {

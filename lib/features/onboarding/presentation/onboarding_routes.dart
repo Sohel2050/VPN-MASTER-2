@@ -1,6 +1,6 @@
-import 'package:winsguard/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:vpn_master/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/config/routes/router_transition.dart';
+import 'package:vpn_master/config/routes/router_transition.dart';
 
 class OnboardingRouter {
   const OnboardingRouter._();

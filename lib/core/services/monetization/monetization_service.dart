@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart' show ConsentInformation, ConsentForm, ConsentRequestParameters;
 import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
-import 'package:winsguard/core/constants/monetization_manager.dart';
+import 'package:vpn_master/core/constants/monetization_manager.dart';
 
 /// Starts Unity LevelPlay and shows interstitial / rewarded ads.
 ///

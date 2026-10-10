@@ -1,26 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/core/helpers/helpers.dart';
-import 'package:winsguard/core/utils/extensions/null_empty_extension.dart';
-import 'package:winsguard/core/utils/extensions/status_extension.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/features/home/bloc/home_bloc.dart';
-import 'package:winsguard/features/home/bloc/home_event.dart';
-import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
-import 'package:winsguard/features/servers/presentation/bloc/servers_bloc.dart';
-import 'package:winsguard/features/servers/presentation/bloc/servers_event.dart';
-import 'package:winsguard/features/servers/presentation/widgets/item_view/server_item_view.dart';
-import 'package:winsguard/features/servers/presentation/widgets/server_loading_widget.dart';
-import 'package:winsguard/widgets/app_bar/secondary_app_bar.dart';
-import 'package:winsguard/widgets/banner_ad_widget.dart';
-import 'package:winsguard/widgets/native_ad_widget.dart';
-import 'package:winsguard/widgets/earth_map_widget.dart';
-import 'package:winsguard/widgets/empty_widget.dart';
-import 'package:winsguard/widgets/error_widget/error_widget.dart';
+import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/utils/extensions/null_empty_extension.dart';
+import 'package:vpn_master/core/utils/extensions/status_extension.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/features/home/bloc/home_bloc.dart';
+import 'package:vpn_master/features/home/bloc/home_event.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:vpn_master/features/servers/presentation/bloc/servers_bloc.dart';
+import 'package:vpn_master/features/servers/presentation/bloc/servers_event.dart';
+import 'package:vpn_master/features/servers/presentation/widgets/item_view/server_item_view.dart';
+import 'package:vpn_master/features/servers/presentation/widgets/server_loading_widget.dart';
+import 'package:vpn_master/widgets/app_bar/secondary_app_bar.dart';
+import 'package:vpn_master/widgets/ad_slot_widget.dart';
+import 'package:vpn_master/widgets/earth_map_widget.dart';
+import 'package:vpn_master/widgets/empty_widget.dart';
+import 'package:vpn_master/widgets/error_widget/error_widget.dart';
 
 /// A page that displays a list of available VPN servers for the user to select from.
 class ServersPage extends HookWidget {
@@ -69,12 +70,14 @@ class ServersPage extends HookWidget {
       context.pop();
     }
 
-    // Fetches the server list when the widget is first built, if the list is empty.
-    useEffect((){ 
-      if(serversBloc.state.vpnServers.isNullOrEmpty){
-        getVpnServers();
-      }
-      return null;
+    // Refreshes the server list as soon as the page opens, then every 10 seconds.
+    useEffect((){
+      // Empty list: normal load. Otherwise refresh in the background.
+      serversBloc.add(GetVpnServers(silent: !serversBloc.state.vpnServers.isNullOrEmpty));
+      final timer = Timer.periodic(const Duration(seconds: 10), (_) {
+        serversBloc.add(GetVpnServers(silent: true));
+      });
+      return timer.cancel;
     },[]);
 
     // The main layout of the page.
@@ -99,7 +102,7 @@ class ServersPage extends HookWidget {
                   child: BlocBuilder<ServersBloc, ServersState>(
                     builder: (context, state) {
                       // Shows a loading animation while fetching servers.
-                      if(state.status.isLoading){
+                      if(state.status.isLoading || state.status.isInitial){
                         return const ServerLoadingWidget();
                       } // If server fetch is successful, display the list.
                       else if(state.status.isSuccess){
@@ -112,17 +115,17 @@ class ServersPage extends HookWidget {
                           return RefreshIndicator(
                             onRefresh: () async => getVpnServers(),
                             child: ListView.builder(
-                                // One extra row for the native ad after the 3rd server.
+                                // One extra row for the ad slot after the 3rd server.
                                 itemCount: vpnServers.length + (vpnServers.length > 3 ? 1 : 0),
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: paddingBottom12,
                                 itemBuilder: (context, index) {
 
-                                  const nativeAdIndex = 3;
-                                  if (vpnServers.length > 3 && index == nativeAdIndex) {
-                                    return const NativeAdWidget();
+                                  const adIndex = 3;
+                                  if (vpnServers.length > 3 && index == adIndex) {
+                                    return const AdSlotWidget();
                                   }
-                                  final serverIndex = (vpnServers.length > 3 && index > nativeAdIndex) ? index - 1 : index;
+                                  final serverIndex = (vpnServers.length > 3 && index > adIndex) ? index - 1 : index;
                                   final vpnServer = vpnServers[serverIndex];
 
                                   // Handles taps on a server item to initiate connection.
@@ -160,8 +163,7 @@ class ServersPage extends HookWidget {
                   ),
                 ),
               ),
-              // Displays a banner ad at the bottom.
-              const BannerAdWidget(),
+
             ],
           ),
 

@@ -1,12 +1,12 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:winsguard/core/theme/theme_cubit.dart';
-import 'package:winsguard/features/home/bloc/home_bloc.dart';
-import 'package:winsguard/features/network_info/presentation/bloc/network_info_bloc.dart';
-import 'package:winsguard/features/onboarding/presentation/cubit/onboarding_cubit.dart';
-import 'package:winsguard/features/servers/presentation/bloc/servers_bloc.dart';
-import 'package:winsguard/features/servers/presentation/bloc/servers_event.dart';
-import 'package:winsguard/features/speed_test/presentation/bloc/speed_test_bloc.dart';
+import 'package:vpn_master/core/theme/theme_cubit.dart';
+import 'package:vpn_master/features/home/bloc/home_bloc.dart';
+import 'package:vpn_master/features/network_info/presentation/bloc/network_info_bloc.dart';
+import 'package:vpn_master/features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import 'package:vpn_master/features/servers/presentation/bloc/servers_bloc.dart';
+import 'package:vpn_master/features/servers/presentation/bloc/servers_event.dart';
+import 'package:vpn_master/features/speed_test/presentation/bloc/speed_test_bloc.dart';
 
 /// Provides a centralized list of all BLoC/Cubit providers for the app.
 class AppBlocProviders {

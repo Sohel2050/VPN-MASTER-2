@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/common/common_routes.dart';
-import 'package:winsguard/config/routes/route_error_page.dart';
-import 'package:winsguard/features/bottom_navigation/bottom_navigation_routes.dart';
-import 'package:winsguard/features/onboarding/presentation/onboarding_routes.dart';
-import 'package:winsguard/features/servers/servers_routes.dart';
-import 'package:winsguard/features/splash/presentation/pages/splash_page.dart';
-import 'package:winsguard/features/splash/splash_routes.dart';
+import 'package:vpn_master/common/common_routes.dart';
+import 'package:vpn_master/config/routes/route_error_page.dart';
+import 'package:vpn_master/features/bottom_navigation/bottom_navigation_routes.dart';
+import 'package:vpn_master/features/onboarding/presentation/onboarding_routes.dart';
+import 'package:vpn_master/features/servers/servers_routes.dart';
+import 'package:vpn_master/features/splash/presentation/pages/splash_page.dart';
+import 'package:vpn_master/features/splash/splash_routes.dart';
 
 // Global navigator key to access the navigator state from anywhere in the app.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

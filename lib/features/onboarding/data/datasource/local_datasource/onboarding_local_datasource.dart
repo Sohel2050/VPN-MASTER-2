@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:hive/hive.dart';
-import 'package:winsguard/core/constants/local_database_keys.dart';
-import 'package:winsguard/core/error/failure.dart';
+import 'package:vpn_master/core/constants/local_database_keys.dart';
+import 'package:vpn_master/core/error/failure.dart';
 
 /// Abstract definition for the local data source of the onboarding feature.
 sealed class OnboardingLocalDatasource {

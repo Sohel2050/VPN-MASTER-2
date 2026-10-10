@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/services/vpn/vpn_service.dart';
-import 'package:winsguard/winsguard_app.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/services/vpn/vpn_service.dart';
+import 'package:vpn_master/vpn_master_app.dart';
 
 import 'core/constants/local_database_keys.dart';
 import 'core/services/monetization/monetization_service.dart' show MonetizationService;
@@ -26,5 +26,5 @@ void main() async {
   await Hive.openBox(LocalDatabaseKeys.database);
 
   // Runs the root widget of the application.
-  runApp(const WinsguardApp());
+  runApp(const VpnMasterApp());
 }

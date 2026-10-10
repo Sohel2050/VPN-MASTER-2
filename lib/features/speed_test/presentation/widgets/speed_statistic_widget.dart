@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/margins.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/margins.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/neon.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
 
 /// A widget for displaying a single speed statistic, such as download or upload speed.
 class SpeedStatisticWidget extends StatelessWidget {
@@ -38,19 +38,14 @@ class SpeedStatisticWidget extends StatelessWidget {
         width: 1.sw,
         padding: padding12,
         margin: margin12,
-        decoration: BoxDecoration(
-            color: background.withValues(alpha: 0.2),
-            borderRadius: radius12,
-            border: Border.all(
-                width: 1.w,
-                color: background
-            )
-        ),
+        decoration: neonDecoration(context, color: background),
         child: Column(
           crossAxisAlignment: .center,
           children: [
             // Header row with icon and title.
-            Row(
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
               mainAxisAlignment: .center,
               children: [
                 Icon(
@@ -65,20 +60,29 @@ class SpeedStatisticWidget extends StatelessWidget {
                 ),
               ],
             ),
+            ),
             gap4,
             // The speed value.
-            Text(
-              speed,
-              style: TextStyle(
-                color: context.colors.textPrimary,
-                fontSize: 28.sp,
-                fontWeight: FontWeight.bold,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                speed,
+                maxLines: 1,
+                style: TextStyle(
+                  color: context.colors.textPrimary,
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             // The speed unit.
-            Text(
-              unit,
-              style: context.bodyMedium,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                unit,
+                maxLines: 1,
+                style: context.bodyMedium,
+              ),
             ),
           ],
         ),

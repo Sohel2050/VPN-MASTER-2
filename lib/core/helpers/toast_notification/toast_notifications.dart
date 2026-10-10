@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 // import 'package:share_plus/share_plus.dart';
 // import 'package:timeago/timeago.dart' as timeago;
 import 'package:toastification/toastification.dart';
-import 'package:winsguard/config/routes/app_routes.dart';
+import 'package:vpn_master/config/routes/app_routes.dart';
 
 class ToastNotifications{
   const ToastNotifications._();

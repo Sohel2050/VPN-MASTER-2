@@ -4,11 +4,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:winsguard/core/theme/theme_cubit.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_colors.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/theme/theme_cubit.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_colors.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
 
 /// The main app bar for the application.
 class PrimaryAppBar extends HookWidget {
@@ -65,7 +65,7 @@ class PrimaryAppBar extends HookWidget {
           // --- App Title ---
           // Displays the application name.
           Text(
-            "${appName.value ?? ""} VPN".toUpperCase(),
+            (appName.value ?? "VPN Master").toUpperCase(),
             style: context.appBarTextStyles.copyWith(
               letterSpacing: 3,
               color: context.colors.primary,

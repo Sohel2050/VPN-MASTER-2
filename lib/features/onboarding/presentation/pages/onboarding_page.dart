@@ -4,13 +4,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
-import 'package:winsguard/features/home/presentation/pages/home_page.dart';
-import 'package:winsguard/features/onboarding/presentation/cubit/onboarding_cubit.dart';
-import 'package:winsguard/widgets/buttons/primary_button.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/features/home/presentation/pages/home_page.dart';
+import 'package:vpn_master/features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import 'package:vpn_master/widgets/buttons/primary_button.dart';
 
 /// A page that introduces the user to the app and its features for the first time.
 class OnboardingPage extends HookWidget {

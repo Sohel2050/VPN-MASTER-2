@@ -12,6 +12,7 @@ Gap gap16 = Gap(16.w);
 Gap gap18 = Gap(18.w);
 Gap gap20 = Gap(20.w);
 Gap gap24 = Gap(24.w);
+Gap gap32 = Gap(32.w);
 Gap gap28 = Gap(28.w);
 Gap gap36 = Gap(36.w);
 Gap gap40 = Gap(40.w);

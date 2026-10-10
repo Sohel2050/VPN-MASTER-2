@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:winsguard/features/servers/presentation/widgets/item_view/server_item_view.dart';
+import 'package:vpn_master/features/servers/presentation/widgets/item_view/server_item_view.dart';
 
 /// A widget that displays a skeleton loading animation for the server list.
 class ServerLoadingWidget extends StatelessWidget {

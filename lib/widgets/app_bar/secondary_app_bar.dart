@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
 
 /// A reusable app bar for secondary screens, featuring a back button and a title.
 class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {

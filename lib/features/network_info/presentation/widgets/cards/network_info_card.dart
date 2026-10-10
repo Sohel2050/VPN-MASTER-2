@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/neon.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
 
 /// Displays a single piece of network information in a card format.
 class NetworkInfoCard extends StatelessWidget {
@@ -31,28 +31,27 @@ class NetworkInfoCard extends StatelessWidget {
     return Container(
       width: 1.sw,
       padding: padding12,
-      decoration: BoxDecoration(
-        color: context.colors.secondaryBackground,
-        borderRadius: radius12,
-        border: Border.all(color: const Color(0xFF3A3220), width: 0.5),
-      ),
+      decoration: neonDecoration(context),
       child: Row(
         children: [
           Icon(icon, color: iconColor),
           gap12,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: context.titleMedium
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                subtitle,
-                style: context.caption,
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: context.titleMedium.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.caption,
+                ),
+              ],
+            ),
           ),
         ],
       ),

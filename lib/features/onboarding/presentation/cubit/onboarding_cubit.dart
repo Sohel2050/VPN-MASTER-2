@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/features/onboarding/domain/usecases/already_onboarded_usecase.dart';
-import 'package:winsguard/features/onboarding/domain/usecases/user_onboarded_usecase.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/features/onboarding/domain/usecases/already_onboarded_usecase.dart';
+import 'package:vpn_master/features/onboarding/domain/usecases/user_onboarded_usecase.dart';
 
 /// Manages the onboarding state of the application.
 class OnboardingCubit extends Cubit<bool>{

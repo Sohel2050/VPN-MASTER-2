@@ -1,13 +1,17 @@
 import 'package:equatable/equatable.dart';
-import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
 /// The base class for all events related to the servers feature.
 sealed class ServersEvent extends Equatable{}
 
 /// Dispatched to fetch the list of available VPN servers.
 class GetVpnServers extends ServersEvent{
+  /// When true the list refreshes in the background (no loading animation).
+  final bool silent;
+  /// Creates a [GetVpnServers] event.
+  GetVpnServers({this.silent = false});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [silent];
 }
 
 /// Dispatched to set the default server from a list of servers.
@@ -54,4 +58,22 @@ class SaveConnectedServer extends ServersEvent{
   List<Object?> get props => [
     connectServer
   ];
+}
+
+
+/// Dispatched when a server failed to connect: it is hidden and the next server is selected.
+class MarkServerFailed extends ServersEvent{
+  /// The server that failed.
+  final VpnServerEntity? server;
+  /// Creates a [MarkServerFailed] event.
+  MarkServerFailed({required this.server});
+  @override
+  List<Object?> get props => [server];
+}
+
+
+/// Dispatched to test (in the background) which servers are really alive.
+class ProbeServers extends ServersEvent{
+  @override
+  List<Object?> get props => [];
 }

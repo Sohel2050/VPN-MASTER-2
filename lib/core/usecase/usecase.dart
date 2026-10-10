@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:winsguard/core/error/failure.dart';
+import 'package:vpn_master/core/error/failure.dart';
 
 /// An abstract class representing a use case, which enforces a standard
 /// contract for executing a piece of business logic.

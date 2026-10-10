@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/config/routes/router_transition.dart';
-import 'package:winsguard/features/network_info/presentation/pages/network_info_page.dart';
+import 'package:vpn_master/config/routes/router_transition.dart';
+import 'package:vpn_master/features/network_info/presentation/pages/network_info_page.dart';
 
 
 class NetworkInfoRouter {

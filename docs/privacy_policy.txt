@@ -1,0 +1,101 @@
+VPN Master - Privacy Policy
+Last updated: October 8, 2026
+Developer: Albonik  |  Website: https://albonik.com  |  Email: support@albonik.com
+============================================================
+
+1. INTRODUCTION
+------------------------------------------------------------
+This Privacy Policy explains how VPN Master ("the App", "we", "us") handles
+information when you use the App. The App is published by Albonik. By using
+the App you agree to the practices described here.
+
+2. INFORMATION WE DO NOT COLLECT
+------------------------------------------------------------
+The App does not require you to create an account, and we do not ask for your
+name, email address, phone number or payment details.
+
+We do not operate the VPN servers listed in the App and we do not record the
+websites you visit or the content of your traffic.
+
+3. INFORMATION STORED ON YOUR DEVICE
+------------------------------------------------------------
+The App stores a few settings only on your device: whether you finished the
+introduction screens, your light or dark theme choice, and the last VPN server
+you selected. This data never leaves your device and is removed when you clear
+the App's data or uninstall it.
+
+4. THIRD-PARTY SERVICES
+------------------------------------------------------------
+VPN servers: the server list is downloaded from VPN Gate (vpngate.net), a
+public academic project run by the University of Tsukuba, Japan. The servers
+are run by volunteers around the world. When you connect, your traffic passes
+through a server operated by one of these volunteers, and that operator or VPN
+Gate may keep connection logs under its own policies. We do not control those
+servers and cannot guarantee their logging practices.
+
+Server checks: to hide servers that are offline, the App sends small test
+connections to the listed VPN servers before you connect. Those servers can
+see your IP address when this happens.
+
+Network information: the Network Info screen asks ip-api.com for your public
+IP address, approximate location, and internet provider so it can show them to
+you. That service receives your IP address as part of the request.
+
+Speed test and ping: the Speed Test screen exchanges test data with third-
+party speed test servers, and the ping check contacts Google (google.com).
+These services see your IP address as with any internet request.
+
+Advertising: the App shows ads through Unity LevelPlay and may use Google's
+User Messaging Platform to ask for consent where required (for example in the
+EEA and UK). Advertising partners may collect device identifiers such as the
+Android Advertising ID, IP address and ad interaction data to serve and
+measure ads, and to personalize them if you allow it. You can reset or delete
+your advertising ID, or opt out of personalized ads, in your Android settings
+(Settings > Privacy > Ads).
+
+Google Play: if you use Share, Rate Us or More Apps, you are taken to Google
+Play or the share sheet of your device, which have their own privacy policies.
+
+5. PERMISSIONS
+------------------------------------------------------------
+Internet and network state: needed to load servers and connect to the VPN.
+
+VPN service: Android asks for your permission before the App creates a VPN
+connection. The App uses it only to route your traffic through the server you
+chose.
+
+Notifications: used to show the ongoing VPN connection notification.
+
+Advertising ID: used by ad partners as described above.
+
+6. DATA SECURITY
+------------------------------------------------------------
+VPN connections use the OpenVPN protocol to encrypt traffic between your
+device and the chosen server. No method of transmission or storage is
+completely secure, and because the servers are run by third parties, you
+should avoid sending highly sensitive information over a free public VPN
+server.
+
+7. CHILDREN'S PRIVACY
+------------------------------------------------------------
+The App is not directed to children under 13, and we do not knowingly collect
+personal information from children. If you believe a child has provided
+information through an ad or third-party service, please contact us so we can
+help.
+
+8. YOUR CHOICES
+------------------------------------------------------------
+You can disconnect the VPN at any time, clear the App's data, uninstall the
+App, limit ad personalization in your Android settings, and change your
+consent choice where the consent form is available.
+
+9. CHANGES TO THIS POLICY
+------------------------------------------------------------
+We may update this policy from time to time. The latest version is always
+available inside the App and the "Last updated" date below will change.
+
+10. CONTACT US
+------------------------------------------------------------
+If you have questions about this policy, email us at support@albonik.com,
+visit https://albonik.com, or see our Google Play developer page:
+https://play.google.com/store/apps/dev?id=5662539472191775885

@@ -13,6 +13,22 @@ class MonetizationManager {
   /// Banner ad unit id.
   static const String bannerAdUnitId = "bthg9c7kjlnslq0x";
 
+  /// MREC (300x250) ad unit id. Create it in the LevelPlay dashboard (ad format:
+  /// Banner, size: MREC) and paste the id here. Until then MREC ads stay hidden.
+  static const String mrecAdUnitId = "43zxnkhf0otypdcy";
+
+  /// Set to true to hide the bottom banner on pages that show an MREC ad
+  /// (Speed and Network). false = the banner is always visible.
+  static const bool hideBannerWhenMrec = false;
+
+  /// false = the big ad slot shows MREC (default, no native network yet).
+  /// true  = the same slot shows a Native ad (use after a native network is added).
+  static const bool useNativeAds = false;
+
+  /// True when a real MREC ad unit id was filled in.
+  static bool get isMrecConfigured =>
+      isConfigured && !mrecAdUnitId.startsWith("YOUR_");
+
   /// Interstitial ad unit id.
   static const String interstitialAdUnitId = "usx47s9izppmoehd";
 

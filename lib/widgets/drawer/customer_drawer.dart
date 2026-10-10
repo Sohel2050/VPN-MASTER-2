@@ -4,15 +4,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:winsguard/common/pages/webview_page.dart';
-import 'package:winsguard/core/constants/text_constants.dart';
-import 'package:winsguard/core/helpers/helpers.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
-import 'package:winsguard/widgets/drawer/drawer_tile/drawer_option_tile.dart';
+import 'package:vpn_master/common/pages/legal_page.dart';
+import 'package:vpn_master/core/constants/text_constants.dart';
+import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/neon.dart';
+import 'package:vpn_master/core/utils/ui_helpers/radius.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/widgets/drawer/drawer_tile/drawer_option_tile.dart';
 
 // The main navigation drawer for the application.
 class CustomSideDrawer extends HookWidget {
@@ -42,6 +43,7 @@ class CustomSideDrawer extends HookWidget {
     }, []);
 
     // Defines the overall structure and appearance of the drawer.
+    // Full height drawer (the banner and the navigation bar hide while it is open).
     return Drawer(
       backgroundColor: context.colors.background,
       shape: RoundedRectangleBorder(
@@ -64,11 +66,7 @@ class CustomSideDrawer extends HookWidget {
                 width: 1.sw,
                 height: 100.h,
                 padding: padding18,
-                decoration: BoxDecoration(
-                    borderRadius: radius12,
-                    color: context.colors.secondaryBackground,
-                    border: Border.all(color: context.colors.primary, width: 0.5),
-                ),
+                decoration: neonDecoration(context),
                 child: Row(
                   crossAxisAlignment: .center,
                   children: [
@@ -86,7 +84,7 @@ class CustomSideDrawer extends HookWidget {
                         crossAxisAlignment: .start,
                         children: [
                           Text(
-                            "${appName.value} VPN",
+                            appName.value ?? "VPN Master",
                             maxLines: 2,
                             overflow: .ellipsis,
                             style: context.titleMedium.copyWith(
@@ -112,46 +110,40 @@ class CustomSideDrawer extends HookWidget {
                 child: ListView(
                   children: [
                     gap12,
-                    // Navigates to the Privacy Policy web page.
+                    // Opens the in-app Privacy Policy.
                     DrawerOptionTile(
                       icon: Icons.privacy_tip_outlined,
                       title: "Privacy Policy",
                       subtitle: "Protecting personal data",
                       onTap: () {
-                        Map<String, dynamic> queryParameters = {
-                          "title": "Privacy Policy",
-                          "url": TextConstants.privacyPolicyUrl
-                        };
-                        context.pushNamed(WebViewPage.name, queryParameters: queryParameters);
                         Navigator.pop(context);
+                        context.pushNamed(
+                          LegalPage.name,
+                          queryParameters: {"type": "privacy"},
+                        );
                       },
                     ),
-                    // Navigates to the Terms & Conditions web page.
+                    // Opens the in-app Terms & Conditions.
                     DrawerOptionTile(
                       leadingAsset: "assets/icons/terms_icon.svg",
                       title: "Terms & Conditions",
                       subtitle: "Guidelines for app usage",
                       onTap: () {
-                        Map<String, dynamic> queryParameters = {
-                          "title": "Terms & Conditions",
-                          "url": TextConstants.termsAndConditionUrl
-                        };
-                        context.pushNamed(WebViewPage.name, queryParameters: queryParameters);
                         Navigator.pop(context);
+                        context.pushNamed(
+                          LegalPage.name,
+                          queryParameters: {"type": "terms"},
+                        );
                       },
                     ),
-                    // Navigates to the About Us web page.
+                    // Opens the developer page on Google Play to show more apps.
                     DrawerOptionTile(
-                      leadingAsset: "assets/icons/about_icon.svg",
-                      title: "About Us",
-                      subtitle: "Learn about this app",
+                      icon: Icons.apps_rounded,
+                      title: "More Apps",
+                      subtitle: "Discover our other apps",
                       onTap: () {
-                        Map<String, dynamic> queryParameters = {
-                          "title": "About Us",
-                          "url": TextConstants.aboutUsUrl
-                        };
-                        context.pushNamed(WebViewPage.name, queryParameters: queryParameters);
                         Navigator.pop(context);
+                        Helpers.launchUri(uri: TextConstants.moreAppsUrl);
                       },
                     ),
                     // Opens the native share sheet to share the app.
@@ -163,9 +155,9 @@ class CustomSideDrawer extends HookWidget {
                         if (appName.value != null && packageName.value != null) {
                           String uri = "${TextConstants.playStore}${packageName.value}";
                           SharePlus.instance.share(ShareParams(
-                            title: "${appName.value} Vpn - Your Secure Network",
-                            subject: "Check out ${appName.value} VPN App!",
-                            text: "Check out ${appName.value} VPN, your shield for online privacy. Get it on Google Play: $uri",
+                            title: "${appName.value} - Your Secure Network",
+                            subject: "Check out ${appName.value} App!",
+                            text: "Check out ${appName.value}, your shield for online privacy. Get it on Google Play: $uri",
                           ));
                         }
                         Navigator.pop(context);

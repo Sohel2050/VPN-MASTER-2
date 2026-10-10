@@ -63,3 +63,10 @@ class TrackVpnStage extends HomeEvent{
   @override
   List<Object?> get props => [stage];
 }
+
+
+/// Dispatched when a connection attempt failed or timed out.
+class ConnectionFailed extends HomeEvent{
+  @override
+  List<Object?> get props => [];
+}

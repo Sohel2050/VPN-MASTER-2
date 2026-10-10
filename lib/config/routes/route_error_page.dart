@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
-import 'package:winsguard/core/utils/ui_helpers/ui_helpers.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/core/utils/ui_helpers/ui_helpers.dart';
 
 /// A page displayed when a route is not found or an error occurs during navigation.
 class ErrorPage extends StatelessWidget {

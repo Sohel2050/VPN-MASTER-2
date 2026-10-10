@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
-import 'package:winsguard/core/constants/local_database_keys.dart';
+import 'package:vpn_master/core/constants/local_database_keys.dart';
 
 
 class ThemeCubit extends Cubit<ThemeMode> {

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:winsguard/core/error/failure.dart';
+import 'package:vpn_master/core/error/failure.dart';
 
 /// Abstract definition for the onboarding repository.
 abstract class OnboardingRepositories {

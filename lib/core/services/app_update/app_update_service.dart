@@ -5,9 +5,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:winsguard/core/constants/text_constants.dart';
-import 'package:winsguard/core/helpers/helpers.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/constants/text_constants.dart';
+import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
 
 /// Data read from the remote update_config.json file.
 class AppUpdateInfo {

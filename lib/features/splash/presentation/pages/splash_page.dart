@@ -4,9 +4,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/features/home/presentation/pages/home_page.dart';
-import 'package:winsguard/features/onboarding/presentation/cubit/onboarding_cubit.dart';
-import 'package:winsguard/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:vpn_master/features/home/presentation/pages/home_page.dart';
+import 'package:vpn_master/features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import 'package:vpn_master/features/onboarding/presentation/pages/onboarding_page.dart';
 
 /// Displays a splash screen and navigates to the correct page based on onboarding status.
 class SplashPage extends HookWidget {
@@ -38,7 +38,7 @@ class SplashPage extends HookWidget {
         body: Container(
           width: 1.sw,
           height: 1.sh,
-          color: const Color(0xff3EB87C),
+          color: const Color(0xff04123F),
           child: Image.asset(
             "assets/icons/splash_icon.png",
             width: 512.w,

@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:csv/csv.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:winsguard/features/servers/data/models/vpn_server_model.dart';
-import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:vpn_master/features/servers/data/models/vpn_server_model.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
 class Helpers{
   const Helpers._();
@@ -96,12 +96,16 @@ class Helpers{
 
   /// Parses VPNGate CSV raw text into a list of models
   static List<VpnServerModel> csvToVpnServerModels(String rawText) {
-    // Remove comments and stars
-    final csvString = rawText.split("#")[1].replaceAll("*", "");
+    // Keep only the CSV lines: drop the "*vpn_servers" line and the trailing "*",
+    // and remove the leading "#" of the header line.
+    final lines = rawText
+        .split(RegExp(r'\r?\n'))
+        .where((line) => line.trim().isNotEmpty && !line.startsWith('*'))
+        .map((line) => line.startsWith('#') ? line.substring(1) : line)
+        .toList();
+    if (lines.length < 2) return [];
 
-    // Convert CSV to List<List<dynamic>>
-    final list = csv.decode(csvString);
-
+    final list = csv.decode(lines.join('\n'));
     if (list.length < 2) return [];
 
     final headers = list.first.map((e) => e.toString()).toList();
@@ -111,23 +115,21 @@ class Helpers{
         .where((row) => row.length == headers.length)
         .map((row) => Map.fromIterables(headers, row))
         .map(VpnServerModel.fromJson)
+        .where((server) => (server.openVPNConfigDataBase64 ?? '').isNotEmpty)
         .toList();
   }
 
 
+  /// Opens [uri] in the browser / Play Store. Never throws.
   static Future<void> launchUri({required String uri}) async {
-    final Uri url = Uri.parse(uri);
-
-    if (await canLaunchUrl(url)) {
+    try {
       await launchUrl(
-        url,
+        Uri.parse(uri),
         mode: LaunchMode.externalApplication, // Opens in browser or relevant app
       );
-    } else {
-      throw 'Could not launch $uri';
+    } catch (_) {
+      // Nothing can open this link on the device; ignore silently.
     }
   }
-
-
 
 }

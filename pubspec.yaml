@@ -1,10 +1,10 @@
-name: winsguard
-description: "A new Flutter project."
+name: vpn_master
+description: "VPN Master - fast and secure VPN app."
 
 publish_to: 'none'
 
 # The version of the application.
-version: 1.0.0+1
+version: 1.0.7+7
 
 environment:
   sdk: ^3.10.4
@@ -12,6 +12,7 @@ environment:
 
 # Application dependencies.
 dependencies:
+  permission_handler: ^12.0.1
   rename: ^3.1.0
   change_app_package_name: ^1.5.0
   flutter:
@@ -81,19 +82,19 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icons/launcher_icon.png"
-  adaptive_icon_foreground: "assets/icons/launcher_icon.png"
-  adaptive_icon_background: "#3EB87C"
+  adaptive_icon_foreground: "assets/icons/launcher_foreground.png"
+  adaptive_icon_background: "#04123F"
 
 
 # Configuration for the app's native splash screen.
 flutter_native_splash:
-  color: "#3EB87C"
+  color: "#04123F"
   image: assets/icons/splash_icon.png
 
   android_12:
-    color: "#3EB87C"
+    color: "#04123F"
     image: assets/icons/splash_icon.png
-    icon_background_color: "#3EB87C"
+    icon_background_color: "#04123F"
 
   fullscreen: true
   android: true

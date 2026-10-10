@@ -1,4 +1,4 @@
-import 'package:winsguard/core/theme/theme_colors.dart';
+import 'package:vpn_master/core/theme/theme_colors.dart';
 import 'package:flutter/material.dart';
 
 extension ThemeExtensionX on BuildContext {

@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/features/network_info/data/datasource/remote_datasource/network_info_remote_datasource.dart';
-import 'package:winsguard/features/network_info/domain/entities/network_info_entity.dart';
-import 'package:winsguard/features/network_info/domain/repositories/network_info_repositories.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/features/network_info/data/datasource/remote_datasource/network_info_remote_datasource.dart';
+import 'package:vpn_master/features/network_info/domain/entities/network_info_entity.dart';
+import 'package:vpn_master/features/network_info/domain/repositories/network_info_repositories.dart';
 
 /// Implementation of the [NetworkInfoRepositories] interface.
 class NetworkInfoRepositoriesImpl implements NetworkInfoRepositories {

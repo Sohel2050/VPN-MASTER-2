@@ -2,12 +2,12 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/constants/api_urls.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/core/network/dio_client.dart';
-import 'package:winsguard/features/network_info/data/models/network_info_model.dart';
-import 'package:winsguard/features/network_info/domain/entities/network_info_entity.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/constants/api_urls.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/core/network/dio_client.dart';
+import 'package:vpn_master/features/network_info/data/models/network_info_model.dart';
+import 'package:vpn_master/features/network_info/domain/entities/network_info_entity.dart';
 
 /// Abstract definition for the remote data source of the network information feature.
 sealed class NetworkInfoRemoteDatasource {

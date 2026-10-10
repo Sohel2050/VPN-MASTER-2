@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/ui_helpers/radius.dart';
 
 BoxDecoration primaryDecoration(BuildContext context) => BoxDecoration(
   color: context.colors.secondaryBackground,

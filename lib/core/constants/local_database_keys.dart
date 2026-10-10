@@ -2,7 +2,7 @@ class LocalDatabaseKeys {
   const LocalDatabaseKeys._();
 
   /// Local Database Name
-  static String database = "Winsguard";
+  static String database = "VpnMaster";
 
   /// Local Database Keys
   static String onboard = "onboard";

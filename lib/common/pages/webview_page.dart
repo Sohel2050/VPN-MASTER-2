@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:winsguard/widgets/app_bar/secondary_app_bar.dart';
-import 'package:winsguard/widgets/circle_loading.dart';
+import 'package:vpn_master/widgets/app_bar/secondary_app_bar.dart';
+import 'package:vpn_master/widgets/circle_loading.dart';
 
 /// A page that displays web content from a given URL within a WebView.
 class WebViewPage extends HookWidget {

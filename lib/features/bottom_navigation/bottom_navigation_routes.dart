@@ -1,9 +1,9 @@
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/config/routes/router_transition.dart';
-import 'package:winsguard/features/bottom_navigation/presentation/pages/bottom_navigation_page.dart';
-import 'package:winsguard/features/home/home_routes.dart';
-import 'package:winsguard/features/network_info/network_info_routes.dart';
-import 'package:winsguard/features/speed_test/speed_test_routes.dart';
+import 'package:vpn_master/config/routes/router_transition.dart';
+import 'package:vpn_master/features/bottom_navigation/presentation/pages/bottom_navigation_page.dart';
+import 'package:vpn_master/features/home/home_routes.dart';
+import 'package:vpn_master/features/network_info/network_info_routes.dart';
+import 'package:vpn_master/features/speed_test/speed_test_routes.dart';
 
 class BottomNavigationRouter {
   const BottomNavigationRouter._();

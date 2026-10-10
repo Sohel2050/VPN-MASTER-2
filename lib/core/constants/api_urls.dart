@@ -13,6 +13,7 @@ class ApiUrls {
   /// Vpn Servers Endpoints
   //static const String servers = "https://www.vpngate.net/api/iphone";
   static const String servers = "http://www.vpngate.net/api/iphone";
+  static const String serversSecure = "https://www.vpngate.net/api/iphone";
 
   /// Network Info Endpoints
   static const String networkInfo = "http://ip-api.com/json";

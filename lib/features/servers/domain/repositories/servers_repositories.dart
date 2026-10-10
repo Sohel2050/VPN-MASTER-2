@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
 /// Abstract definition for the servers repository.
 abstract class ServersRepositories {

@@ -45,16 +45,27 @@ class VpnService {
 
 
   /// Connects to the VPN using the provided config and credentials.
-  Future<void> connect({required String config, required String country}) async {
-    // Requests necessary permissions before attempting to connect.
-    if(!await requestPermission()) return;
-    await engine.connect(
-        config,
-        country,
-        username: "vpn",
-        password: "vpn",
-        certIsRequired: true
-    );
+  /// Returns an error message when the connection could not be started, otherwise null.
+  Future<String?> connect({required String config, required String country}) async {
+    if (config.trim().isEmpty) {
+      return "This server has no valid configuration. Please choose another server.";
+    }
+    try {
+      // Requests necessary permissions before attempting to connect.
+      if (!await requestPermission()) {
+        return "VPN permission was not granted. Please allow it to connect.";
+      }
+      await engine.connect(
+          config,
+          country,
+          username: "vpn",
+          password: "vpn",
+          certIsRequired: true
+      );
+      return null;
+    } catch (e) {
+      return "Could not start the VPN connection. Please try another server.";
+    }
   }
 
   /// Disconnects from the current VPN session.

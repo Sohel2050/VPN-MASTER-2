@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
-import 'package:winsguard/config/routes/router_transition.dart';
-import 'package:winsguard/features/servers/presentation/page/servers_page.dart';
+import 'package:vpn_master/config/routes/router_transition.dart';
+import 'package:vpn_master/features/servers/presentation/page/servers_page.dart';
 
 
 class ServersRouter {

@@ -4,17 +4,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:winsguard/core/helpers/helpers.dart';
-import 'package:winsguard/core/utils/extensions/null_empty_extension.dart';
-import 'package:winsguard/core/utils/extensions/status_extension.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
-import 'package:winsguard/features/servers/presentation/bloc/servers_bloc.dart';
-import 'package:winsguard/features/servers/presentation/bloc/servers_event.dart';
-import 'package:winsguard/features/servers/presentation/page/servers_page.dart';
+import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/utils/extensions/null_empty_extension.dart';
+import 'package:vpn_master/core/utils/extensions/status_extension.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/radius.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/features/servers/presentation/bloc/servers_bloc.dart';
+import 'package:vpn_master/features/servers/presentation/bloc/servers_event.dart';
+import 'package:vpn_master/features/servers/presentation/page/servers_page.dart';
 
 /// A widget that displays the currently selected VPN server and allows navigation to the server list.
 class SelectedServerWidget extends HookWidget {
@@ -62,17 +62,21 @@ class SelectedServerWidget extends HookWidget {
                       width: 40.w,
                       height: 40.w,
                       fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(Icons.public, size: 40.w),
                     ),
                   ),
 
                   gap12,
 
                   // Displays the server's country and speed.
-                  Column(
+                  Expanded(
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         state.selectedServer?.countryLong ?? "United Kingdom",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: context.titleMedium.copyWith(
                             fontWeight: FontWeight.bold
                         ),
@@ -98,8 +102,7 @@ class SelectedServerWidget extends HookWidget {
 
                     ],
                   ),
-
-                  const Spacer(),
+                  ),
 
                   // An icon indicating that the widget is tappable.
                   Icon(

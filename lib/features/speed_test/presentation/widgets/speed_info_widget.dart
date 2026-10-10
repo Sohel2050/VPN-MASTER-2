@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:winsguard/core/helpers/helpers.dart';
-import 'package:winsguard/core/utils/extensions/status_extension.dart';
-import 'package:winsguard/features/speed_test/presentation/bloc/speed_test_bloc.dart';
-import 'package:winsguard/features/speed_test/presentation/widgets/speed_statistic_widget.dart';
+import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/utils/extensions/status_extension.dart';
+import 'package:vpn_master/features/speed_test/presentation/bloc/speed_test_bloc.dart';
+import 'package:vpn_master/features/speed_test/presentation/widgets/speed_statistic_widget.dart';
 
 /// A widget that displays detailed information about the speed test results,
 /// including download, upload, ping, and network quality.

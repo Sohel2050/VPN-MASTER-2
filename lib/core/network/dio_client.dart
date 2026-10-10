@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/core/helpers/toast_notification/toast_notifications.dart';
-import 'package:winsguard/core/network/interceptor/logger_interceptor.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/core/network/interceptor/logger_interceptor.dart';
 
 /// A Dio wrapper for making HTTP requests with centralized error handling and configuration.
 class DioClient {
@@ -153,23 +152,29 @@ class DioClient {
   }
 
   /// Maps a [DioException] to a corresponding [Failure] type.
+  /// The messages tell the real reason so problems are easy to understand.
   Failure dioExceptionToFailure(DioException e) {
     switch (e.type) {
       case DioExceptionType.badResponse:
-        // Shows a toast notification for API errors.
-        ToastNotifications.showApiErrorToast(
-              e.response?.statusCode ?? 500, e.response?.data["message"]);
-        return ApiFailure(
-          e.response?.statusCode ?? 500,
-          "${e.response?.data["message"]}",
-        );
+        final code = e.response?.statusCode ?? 500;
+        return ApiFailure(code, "Server responded with error $code. Please try again later.");
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return const NetworkFailure("Request timeout, please try again.");
+        return const NetworkFailure("Request timed out. The server is slow or blocked on your network.");
+      case DioExceptionType.badCertificate:
+        return const NetworkFailure("Secure connection failed (bad certificate).");
+      case DioExceptionType.connectionError:
+        return NetworkFailure("Could not reach the server (${_short(e.error)}). Check your internet connection.");
       case DioExceptionType.cancel:
         return const UnknownFailure("Request was cancelled.");
       case DioExceptionType.unknown:
-      default:
-        return const UnknownFailure("Something went wrong. Please check your internet connection.");
+        return UnknownFailure("Something went wrong (${_short(e.error)}).");
     }
+  }
+
+  String _short(Object? error) {
+    final text = (error ?? "unknown").toString().replaceAll("\n", " ");
+    return text.length > 80 ? "${text.substring(0, 80)}..." : text;
   }
 }

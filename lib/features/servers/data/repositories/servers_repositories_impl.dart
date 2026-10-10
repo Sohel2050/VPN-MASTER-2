@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/features/servers/data/datasource/local_datasource/servers_local_datasource.dart';
-import 'package:winsguard/features/servers/data/datasource/remote_datasource/servers_remote_datasource.dart';
-import 'package:winsguard/features/servers/domain/entities/vpn_server_entity.dart';
-import 'package:winsguard/features/servers/domain/repositories/servers_repositories.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/features/servers/data/datasource/local_datasource/servers_local_datasource.dart';
+import 'package:vpn_master/features/servers/data/datasource/remote_datasource/servers_remote_datasource.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:vpn_master/features/servers/domain/repositories/servers_repositories.dart';
 
 /// Implementation of the [ServersRepositories] interface.
 class ServersRepositoriesImpl implements ServersRepositories {

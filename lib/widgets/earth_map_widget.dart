@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
 
 class EarthMapWidget extends StatelessWidget {
   final Alignment? alignment;

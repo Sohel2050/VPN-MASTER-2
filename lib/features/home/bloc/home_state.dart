@@ -14,6 +14,8 @@ class HomeState extends Equatable{
   final VpnStatus? vpnStatus;
   /// The current stage in the VPN connection lifecycle (e.g., connecting, connected).
   final VPNStage? vpnStage;
+  /// True when the last connection attempt failed.
+  final bool connectionFailed;
 
   /// Creates a [HomeState].
   const HomeState({
@@ -21,7 +23,8 @@ class HomeState extends Equatable{
     required this.status,
     required this.vpnIsConnected,
     required this.vpnStatus,
-    required this.vpnStage
+    required this.vpnStage,
+    this.connectionFailed = false,
   });
 
   /// Creates the initial state for the home screen.
@@ -39,13 +42,15 @@ class HomeState extends Equatable{
     Status? status,
     bool? vpnIsConnected,
     VpnStatus? vpnStatus,
-    VPNStage? vpnStage
+    VPNStage? vpnStage,
+    bool? connectionFailed,
   }) => HomeState(
     message: message ?? this.message,
     status: status ?? this.status,
     vpnIsConnected: vpnIsConnected ?? this.vpnIsConnected,
     vpnStatus: vpnStatus ?? this.vpnStatus,
-    vpnStage: vpnStage ?? this.vpnStage
+    vpnStage: vpnStage ?? this.vpnStage,
+    connectionFailed: connectionFailed ?? this.connectionFailed,
   );
 
   @override
@@ -54,7 +59,8 @@ class HomeState extends Equatable{
     status,
     vpnIsConnected,
     vpnStatus,
-    vpnStage
+    vpnStage,
+    connectionFailed
   ];
 
 }

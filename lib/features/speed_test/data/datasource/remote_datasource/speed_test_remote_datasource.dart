@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/constants/api_urls.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/core/network/dio_client.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/constants/api_urls.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/core/network/dio_client.dart';
 
 /// Abstract definition for the remote data source of the speed test.
 sealed class SpeedTestRemoteDatasource {

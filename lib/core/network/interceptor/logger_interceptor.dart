@@ -15,6 +15,10 @@ class LoggerInterceptor extends Interceptor {
   );
 
   String _prettyJson(dynamic data) {
+    // Huge bodies (like the VPN server list) must not be printed: it freezes the app.
+    if (data is String && data.length > 1500) {
+      return "<${data.length} characters hidden>";
+    }
     try {
       if (data is String) {
         final decoded = json.decode(data);

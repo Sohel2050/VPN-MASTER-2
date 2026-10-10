@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/decoration.dart';
-import 'package:winsguard/core/utils/ui_helpers/margins.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/neon.dart';
+import 'package:vpn_master/core/utils/ui_helpers/margins.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
 
 /// A reusable tile for displaying an option in a list, typically used in a drawer.
 class DrawerOptionTile extends StatelessWidget {
@@ -39,7 +39,7 @@ class DrawerOptionTile extends StatelessWidget {
       child: Container(
         margin: marginV6,
         padding: padding16,
-        decoration: primaryDecoration(context),
+        decoration: neonDecoration(context),
         child: Row(
           children: [
             // Displays the leading icon or SVG asset.

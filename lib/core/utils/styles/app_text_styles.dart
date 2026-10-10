@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
 
 /// A utility class that defines the text styles used throughout the application,
 /// following the Material Design type scale.

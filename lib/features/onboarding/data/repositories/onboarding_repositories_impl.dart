@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/error/failure.dart';
-import 'package:winsguard/features/onboarding/data/datasource/local_datasource/onboarding_local_datasource.dart';
-import 'package:winsguard/features/onboarding/domain/repositories/onboarding_repositories.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/error/failure.dart';
+import 'package:vpn_master/features/onboarding/data/datasource/local_datasource/onboarding_local_datasource.dart';
+import 'package:vpn_master/features/onboarding/domain/repositories/onboarding_repositories.dart';
 
 /// Implementation of the [OnboardingRepositories] interface.
 class OnboardingRepositoriesImpl implements OnboardingRepositories{

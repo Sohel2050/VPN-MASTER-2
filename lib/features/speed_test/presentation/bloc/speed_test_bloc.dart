@@ -4,10 +4,10 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_internet_speed_test_pro/flutter_internet_speed_test_pro.dart';
-import 'package:winsguard/config/service_locator/service_locator.dart';
-import 'package:winsguard/core/utils/enums/enums.dart';
-import 'package:winsguard/features/speed_test/domain/usecases/get_ping_usecase.dart';
-import 'package:winsguard/features/speed_test/presentation/bloc/speed_test_event.dart';
+import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/utils/enums/enums.dart';
+import 'package:vpn_master/features/speed_test/domain/usecases/get_ping_usecase.dart';
+import 'package:vpn_master/features/speed_test/presentation/bloc/speed_test_event.dart';
 
 part 'speed_test_state.dart';
 

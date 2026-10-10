@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:winsguard/core/utils/extensions/theme_extension.dart';
-import 'package:winsguard/core/utils/styles/app_text_styles.dart';
-import 'package:winsguard/core/utils/ui_helpers/margins.dart';
-import 'package:winsguard/core/utils/ui_helpers/paddings.dart';
-import 'package:winsguard/core/utils/ui_helpers/radius.dart';
-import 'package:winsguard/core/utils/ui_helpers/spacing.dart';
+import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/styles/app_text_styles.dart';
+import 'package:vpn_master/core/utils/ui_helpers/margins.dart';
+import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
+import 'package:vpn_master/core/utils/ui_helpers/radius.dart';
+import 'package:vpn_master/core/utils/ui_helpers/spacing.dart';
 
 /// A widget that displays a single server item in the server list.
 class ServerItemView extends StatelessWidget {
@@ -58,21 +58,28 @@ class ServerItemView extends StatelessWidget {
               width: 40.w,
               height: 40.w,
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Icon(Icons.public, size: 40.w),
             ),
           ),
           gap8,
           // Server details
-          Column(
+          Expanded(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 country,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: context.titleMedium
                     .copyWith(fontWeight: FontWeight.bold),
               ),
 
 
-              Row(
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
                 crossAxisAlignment: .center,
                 children: [
                   // Speed
@@ -108,9 +115,11 @@ class ServerItemView extends StatelessWidget {
 
                 ],
               ),
+              ),
             ],
           ),
-          const Spacer(),
+          ),
+          gap8,
 
           // User count
           Icon(

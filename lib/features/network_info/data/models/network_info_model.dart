@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:winsguard/features/network_info/domain/entities/network_info_entity.dart';
+import 'package:vpn_master/features/network_info/domain/entities/network_info_entity.dart';
 
 /// A data model for network information, used for parsing data from the API.
 class NetworkInfoModel {
