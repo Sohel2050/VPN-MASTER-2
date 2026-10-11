@@ -77,3 +77,10 @@ class ProbeServers extends ServersEvent{
   @override
   List<Object?> get props => [];
 }
+
+
+/// Loads your own (private) servers.
+class LoadOwnServers extends ServersEvent{
+  @override
+  List<Object?> get props => [];
+}

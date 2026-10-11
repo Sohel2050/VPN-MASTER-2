@@ -41,6 +41,8 @@ class VpnConnectorWidget extends HookWidget {
           ConnectVpn(
             config: selectedServer.openVPNConfig ?? "",
             country: selectedServer.countryLong ?? "",
+            username: selectedServer.username,
+            password: selectedServer.password,
           )
       );
       serversBloc.add(SaveConnectedServer(connectServer: selectedServer));

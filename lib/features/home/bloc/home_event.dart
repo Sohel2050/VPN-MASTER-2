@@ -21,17 +21,25 @@ class ConnectVpn extends HomeEvent{
   final String config;
   /// The name of the country for the server.
   final String country;
+  /// Login for servers that need one (your own VPS). Optional.
+  final String? username;
+  /// Password for servers that need one. Optional.
+  final String? password;
 
   /// Creates a [ConnectVpn] event.
   ConnectVpn({
     required this.config,
     required this.country,
+    this.username,
+    this.password,
   });
 
   @override
   List<Object?> get props => [
     config,
-    country
+    country,
+    username,
+    password,
   ];
 }
 

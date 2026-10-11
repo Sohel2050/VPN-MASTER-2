@@ -6,6 +6,7 @@ import 'package:vpn_master/core/helpers/helpers.dart';
 import 'package:vpn_master/core/helpers/server_probe.dart';
 import 'package:vpn_master/core/services/vpn/vpn_service.dart';
 import 'package:vpn_master/core/utils/enums/enums.dart';
+import 'package:vpn_master/features/servers/data/own_servers_source.dart';
 import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 import 'package:vpn_master/features/servers/domain/usecases/get_connected_server_usecase.dart';
 import 'package:vpn_master/features/servers/domain/usecases/get_vpn_servers_usecase.dart';
@@ -27,6 +28,9 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
     on<GetConnectedServer>(_onGetConnectedServer);
     on<MarkServerFailed>(_onMarkServerFailed);
     on<ProbeServers>(_onProbeServers);
+    on<LoadOwnServers>(_onLoadOwnServers);
+    // Load your private servers as soon as the app starts.
+    add(LoadOwnServers());
   }
 
   /// Handles the [GetVpnServers] event, fetching the list of available VPN servers.
@@ -66,8 +70,22 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
     );
   }
 
-  /// Sets the default server from a list of servers.
+  /// Loads the private servers; they are selected by default when you have any.
+  Future<void> _onLoadOwnServers(LoadOwnServers event, Emitter<ServersState> emit) async {
+    final own = await OwnServersSource.load();
+    if (isClosed) return;
+    emit(state.copyWith(ownServers: own));
+    if (state.selectedServer == null && own.isNotEmpty) {
+      emit(state.copyWith(selectedServer: own.first));
+    }
+  }
+
+  /// Sets the default server from a list of servers (your own server first).
   void _onDefaultServer(DefaultServer event, Emitter<ServersState> emit){
+    if (state.ownServers.isNotEmpty) {
+      emit(state.copyWith(selectedServer: state.ownServers.first));
+      return;
+    }
     if (event.servers.isEmpty) return;
     Helpers.sortServerList(event.servers);
     emit(state.copyWith(selectedServer: event.servers.first));
@@ -121,6 +139,7 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
           status: state.status,
           selectedServer: next,
           vpnServers: alive,
+          ownServers: state.ownServers,
         ));
       }
     } finally {
@@ -132,6 +151,8 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
   void _onMarkServerFailed(MarkServerFailed event, Emitter<ServersState> emit){
     final failed = event.server;
     if (failed == null) return;
+    // Your own servers are never hidden or replaced automatically.
+    if (failed.isOwn) return;
     FailedServers.add(failed.ip);
     final remaining = (state.vpnServers ?? <VpnServerEntity>[])
         .where((s) => s.ip != failed.ip)
@@ -146,6 +167,7 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
       status: state.status,
       selectedServer: next,
       vpnServers: remaining,
+      ownServers: state.ownServers,
     ));
   }
 

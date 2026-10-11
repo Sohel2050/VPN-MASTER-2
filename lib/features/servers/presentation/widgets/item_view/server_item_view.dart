@@ -22,6 +22,8 @@ class ServerItemView extends StatelessWidget {
   final String users;
   /// Whether the server is currently selected.
   final bool isSelected;
+  /// True for your own private server (shows a "Private server" label).
+  final bool isOwn;
 
   /// Creates a [ServerItemView].
   const ServerItemView({
@@ -32,6 +34,7 @@ class ServerItemView extends StatelessWidget {
     required this.ping,
     required this.users,
     required this.isSelected,
+    this.isOwn = false,
   });
 
   @override
@@ -76,7 +79,15 @@ class ServerItemView extends StatelessWidget {
               ),
 
 
-              FittedBox(
+              isOwn
+              ? Row(
+                  children: [
+                    Icon(Icons.lock_outline_rounded, color: context.colors.primary, size: 16.sp),
+                    gap4,
+                    Text("Private server", style: context.caption.copyWith(fontSize: 12.sp)),
+                  ],
+                )
+              : FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
                 child: Row(
@@ -121,17 +132,19 @@ class ServerItemView extends StatelessWidget {
           ),
           gap8,
 
-          // User count
-          Icon(
-            CupertinoIcons.person_2,
-            color: context.colors.iconPrimary,
-            size: 18.sp,
-          ),
-          gap4,
-          Text(
-            users,
-            style: context.caption,
-          ),
+          // User count (not shown for private servers)
+          if (!isOwn) ...[
+            Icon(
+              CupertinoIcons.person_2,
+              color: context.colors.iconPrimary,
+              size: 18.sp,
+            ),
+            gap4,
+            Text(
+              users,
+              style: context.caption,
+            ),
+          ],
 
           gap12,
           // Selection indicator

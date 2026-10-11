@@ -62,6 +62,8 @@ class ServersPage extends HookWidget {
             ConnectVpn(
               config: vpnServer.openVPNConfig ?? "",
               country: vpnServer.countryLong ?? "",
+              username: vpnServer.username,
+              password: vpnServer.password,
             )
         );
       });
@@ -80,6 +82,46 @@ class ServersPage extends HookWidget {
       return timer.cancel;
     },[]);
 
+    // Tabs: "My Servers" (your own VPS, first) and "Public" (volunteer servers).
+    final tabController = useTabController(
+      initialLength: 2,
+      initialIndex: serversBloc.state.ownServers.isNotEmpty ? 0 : 1,
+    );
+
+    /// The list of your own private servers.
+    Widget ownTab(ServersState state){
+      final list = state.ownServers;
+      if (list.isEmpty) {
+        return const EmptyWidget(
+          title: "No private servers",
+          description: "Add your own servers in own_servers.json",
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: () async => serversBloc.add(LoadOwnServers()),
+        child: ListView.builder(
+          itemCount: list.length,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: paddingBottom12,
+          itemBuilder: (context, index) {
+            final server = list[index];
+            return GestureDetector(
+              onTap: () => connectVpn(server),
+              child: ServerItemView(
+                isOwn: true,
+                isSelected: state.selectedServer?.ip == server.ip,
+                flag: "assets/flags/${server.countryShort?.toLowerCase()}.png",
+                country: server.hostname ?? server.countryLong ?? "Private server",
+                speed: "",
+                ping: "",
+                users: "",
+              ),
+            );
+          },
+        ),
+      );
+    }
+
     // The main layout of the page.
     return Scaffold(
       appBar: const SecondaryAppBar(title: "Servers Location"),
@@ -93,8 +135,25 @@ class ServersPage extends HookWidget {
 
           Column(
             children: [
+              TabBar(
+                controller: tabController,
+                indicatorColor: context.colors.primary,
+                labelColor: context.colors.primary,
+                unselectedLabelColor: context.colors.textSecondary,
+                dividerColor: Colors.transparent,
+                tabs: const [Tab(text: "My Servers"), Tab(text: "Public")],
+              ),
               Expanded(
-                child: Container(
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
+                    BlocBuilder<ServersBloc, ServersState>(
+                      builder: (context, state) => Padding(
+                        padding: paddingH12,
+                        child: ownTab(state),
+                      ),
+                    ),
+                    Container(
                   width: 1.sw,
                   height: 1.sh,
                   padding: paddingH12,
@@ -161,6 +220,8 @@ class ServersPage extends HookWidget {
                       }
                     },
                   ),
+                ),
+                  ],
                 ),
               ),
 

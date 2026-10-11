@@ -87,7 +87,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
     emit(state.copyWith(vpnStage: VPNStage.connecting, connectionFailed: false));
     final error = await VpnService.instance.connect(
         config: event.config,
-        country: event.country
+        country: event.country,
+        username: event.username,
+        password: event.password
     );
     if (error != null) {
       emit(state.copyWith(vpnStage: VPNStage.disconnected, message: error, connectionFailed: true));

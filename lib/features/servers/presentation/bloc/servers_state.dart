@@ -10,6 +10,8 @@ class ServersState extends Equatable{
   final VpnServerEntity? selectedServer;
   /// The list of available VPN servers.
   final List<VpnServerEntity>? vpnServers;
+  /// Your own (private) servers, shown first in the "My Servers" tab.
+  final List<VpnServerEntity> ownServers;
 
   /// Creates a [ServersState].
   const ServersState({
@@ -17,6 +19,7 @@ class ServersState extends Equatable{
     required this.status,
     required this.selectedServer,
     required this.vpnServers,
+    this.ownServers = const [],
   });
 
   /// Creates the initial state for the servers feature.
@@ -32,12 +35,14 @@ class ServersState extends Equatable{
     String? message,
     Status? status,
     VpnServerEntity? selectedServer,
-    List<VpnServerEntity>? vpnServers
+    List<VpnServerEntity>? vpnServers,
+    List<VpnServerEntity>? ownServers
   })=> ServersState(
     message: message ?? this.message,
     status: status ?? this.status,
     selectedServer: selectedServer ?? this.selectedServer,
     vpnServers: vpnServers ?? this.vpnServers,
+    ownServers: ownServers ?? this.ownServers,
   );
 
   @override
@@ -45,7 +50,8 @@ class ServersState extends Equatable{
     message,
     status,
     selectedServer,
-    vpnServers
+    vpnServers,
+    ownServers
   ];
 
 }

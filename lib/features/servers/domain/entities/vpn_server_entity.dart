@@ -18,6 +18,12 @@ class VpnServerEntity {
   final int? numVpnSessions;
   /// The Base64 encoded OpenVPN configuration data.
   final String? openVPNConfigDataBase64;
+  /// Username for servers that need a login (your own VPS). Empty for public servers.
+  final String? username;
+  /// Password for servers that need a login (your own VPS).
+  final String? password;
+  /// True for your own private servers (shown in the "My Servers" tab).
+  final bool isOwn;
 
   /// Creates a [VpnServerEntity].
   const VpnServerEntity({
@@ -29,6 +35,9 @@ class VpnServerEntity {
     this.countryShort,
     this.numVpnSessions,
     this.openVPNConfigDataBase64,
+    this.username,
+    this.password,
+    this.isOwn = false,
   });
 
   /// Converts the entity to a JSON map for serialization.
@@ -41,6 +50,9 @@ class VpnServerEntity {
     'CountryShort': countryShort,
     'NumVpnSessions': numVpnSessions,
     'OpenVPN_ConfigData_Base64': openVPNConfigDataBase64,
+    'Username': username,
+    'Password': password,
+    'IsOwn': isOwn,
   };
 
   /// Decodes the Base64 OpenVPN config and applies necessary compatibility fixes.

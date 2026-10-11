@@ -21,6 +21,12 @@ class VpnServerModel {
   int? numVpnSessions;
   /// The Base64 encoded OpenVPN configuration data.
   String? openVPNConfigDataBase64;
+  /// Login username (own servers only).
+  String? username;
+  /// Login password (own servers only).
+  String? password;
+  /// True for your own private servers.
+  bool isOwn;
 
   /// Creates a [VpnServerModel].
   VpnServerModel({
@@ -32,6 +38,9 @@ class VpnServerModel {
     this.countryShort,
     this.numVpnSessions,
     this.openVPNConfigDataBase64,
+    this.username,
+    this.password,
+    this.isOwn = false,
   });
 
   /// Create from raw JSON string
@@ -52,6 +61,9 @@ class VpnServerModel {
         ? json['NumVpnSessions']
         : int.tryParse('${json['NumVpnSessions']}'),
     openVPNConfigDataBase64: json['OpenVPN_ConfigData_Base64']?.toString(),
+    username: json['Username']?.toString(),
+    password: json['Password']?.toString(),
+    isOwn: json['IsOwn'] == true,
   );
 
   /// Convert to JSON Map
@@ -64,6 +76,9 @@ class VpnServerModel {
     'CountryShort': countryShort,
     'NumVpnSessions': numVpnSessions,
     'OpenVPN_ConfigData_Base64': openVPNConfigDataBase64,
+    'Username': username,
+    'Password': password,
+    'IsOwn': isOwn,
   };
 
   /// Converts the model to a [VpnServerEntity].
@@ -75,7 +90,10 @@ class VpnServerModel {
     countryLong: countryLong,
     countryShort: countryShort,
     numVpnSessions: numVpnSessions,
-    openVPNConfigDataBase64: openVPNConfigDataBase64
+    openVPNConfigDataBase64: openVPNConfigDataBase64,
+    username: username,
+    password: password,
+    isOwn: isOwn,
   );
 
 }

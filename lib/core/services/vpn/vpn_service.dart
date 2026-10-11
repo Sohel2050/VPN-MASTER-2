@@ -46,7 +46,7 @@ class VpnService {
 
   /// Connects to the VPN using the provided config and credentials.
   /// Returns an error message when the connection could not be started, otherwise null.
-  Future<String?> connect({required String config, required String country}) async {
+  Future<String?> connect({required String config, required String country, String? username, String? password}) async {
     if (config.trim().isEmpty) {
       return "This server has no valid configuration. Please choose another server.";
     }
@@ -58,8 +58,8 @@ class VpnService {
       await engine.connect(
           config,
           country,
-          username: "vpn",
-          password: "vpn",
+          username: (username == null || username.isEmpty) ? "vpn" : username,
+          password: (password == null || password.isEmpty) ? "vpn" : password,
           certIsRequired: true
       );
       return null;
