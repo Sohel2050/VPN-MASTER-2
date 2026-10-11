@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:oneconnect_flutter/openvpn_flutter.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 /// The base class for all events related to the home screen and VPN connection.
 sealed class HomeEvent extends Equatable{}
 
@@ -25,6 +26,8 @@ class ConnectVpn extends HomeEvent{
   final String? username;
   /// Password for servers that need one. Optional.
   final String? password;
+  /// The protocol of the server (OpenVPN or WireGuard).
+  final VpnProtocol protocol;
 
   /// Creates a [ConnectVpn] event.
   ConnectVpn({
@@ -32,6 +35,7 @@ class ConnectVpn extends HomeEvent{
     required this.country,
     this.username,
     this.password,
+    this.protocol = VpnProtocol.openvpn,
   });
 
   @override
@@ -40,6 +44,7 @@ class ConnectVpn extends HomeEvent{
     country,
     username,
     password,
+    protocol,
   ];
 }
 

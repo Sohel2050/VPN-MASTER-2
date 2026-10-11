@@ -3,8 +3,10 @@ import 'dart:async';
 
 import 'package:oneconnect_flutter/openvpn_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
+import 'package:wireguard_flutter/wireguard_flutter.dart';
 
-/// A service that manages the VPN connection using the OpenVPN library.
+/// A service that manages the VPN connection (OpenVPN and WireGuard).
 class VpnService {
 
   // Private constructor for the singleton instance.
@@ -15,6 +17,15 @@ class VpnService {
 
   // The OpenVPN engine instance.
   late OpenVPN engine;
+
+  // The WireGuard engine instance.
+  final _wireguard = WireGuardFlutter.instance;
+
+  // The protocol of the connection that was started last.
+  VpnProtocol _active = VpnProtocol.openvpn;
+
+  // The package name, used as the iOS provider bundle id for WireGuard.
+  String _packageName = '';
 
   // Stream controller for broadcasting VPN status updates.
   final StreamController<VpnStatus?> _statusController = StreamController.broadcast();
@@ -31,22 +42,77 @@ class VpnService {
   }
 
 
-  /// Initializes the VPN engine with app-specific identifiers.
+  /// Initializes the VPN engines with app-specific identifiers.
   Future<void> initialize() async {
     // Fetches package information to dynamically set iOS-specific identifiers.
     await PackageInfo.fromPlatform().then((packageInfo) async {
+      _packageName = packageInfo.packageName;
       await engine.initialize(
         groupIdentifier: "group.${packageInfo.packageName}", // iOS App Group
         providerBundleIdentifier: packageInfo.packageName, // iOS VPN extension bundle ID
         localizedDescription: packageInfo.appName, // Shown in VPN permission dialog
       );
     });
+    await _initWireGuard();
+  }
+
+  /// Starts the WireGuard engine. A failure here must never break OpenVPN.
+  Future<void> _initWireGuard() async {
+    try {
+      await _wireguard.initialize(interfaceName: 'wg0');
+      _wireguard.vpnStageSnapshot.listen((stage) {
+        final mapped = _mapWireGuardStage(stage.name);
+        if (mapped != null) _stageController.add(mapped);
+      });
+    } catch (_) {}
+  }
+
+  /// Converts a WireGuard stage name to the app's [VPNStage].
+  static VPNStage? _mapWireGuardStage(String name) {
+    switch (name) {
+      case 'connected':
+        return VPNStage.connected;
+      case 'connecting':
+      case 'waitingConnection':
+      case 'preparing':
+      case 'authenticating':
+      case 'reconnect':
+        return VPNStage.connecting;
+      case 'disconnecting':
+        return VPNStage.disconnecting;
+      case 'disconnected':
+      case 'noConnection':
+      case 'exiting':
+        return VPNStage.disconnected;
+      case 'denied':
+        return VPNStage.denied;
+      default:
+        return null;
+    }
+  }
+
+  /// Reads "Endpoint = host:port" from a WireGuard config.
+  static String? _wireGuardEndpoint(String config) {
+    for (final raw in config.split(RegExp(r'\r?\n'))) {
+      final line = raw.trim();
+      if (line.toLowerCase().startsWith('endpoint')) {
+        final index = line.indexOf('=');
+        if (index != -1) return line.substring(index + 1).trim();
+      }
+    }
+    return null;
   }
 
 
   /// Connects to the VPN using the provided config and credentials.
   /// Returns an error message when the connection could not be started, otherwise null.
-  Future<String?> connect({required String config, required String country, String? username, String? password}) async {
+  Future<String?> connect({
+    required String config,
+    required String country,
+    String? username,
+    String? password,
+    VpnProtocol protocol = VpnProtocol.openvpn,
+  }) async {
     if (config.trim().isEmpty) {
       return "This server has no valid configuration. Please choose another server.";
     }
@@ -54,6 +120,19 @@ class VpnService {
       // Requests necessary permissions before attempting to connect.
       if (!await requestPermission()) {
         return "VPN permission was not granted. Please allow it to connect.";
+      }
+      _active = protocol;
+      if (protocol == VpnProtocol.wireguard) {
+        final endpoint = _wireGuardEndpoint(config);
+        if (endpoint == null || endpoint.isEmpty) {
+          return "This WireGuard server has no Endpoint. Please choose another server.";
+        }
+        await _wireguard.startVpn(
+          serverAddress: endpoint,
+          wgQuickConfig: config,
+          providerBundleIdentifier: _packageName,
+        );
+        return null;
       }
       await engine.connect(
           config,
@@ -69,10 +148,26 @@ class VpnService {
   }
 
   /// Disconnects from the current VPN session.
-  void disconnect() => engine.disconnect();
+  void disconnect() {
+    if (_active == VpnProtocol.wireguard) {
+      _wireguard.stopVpn().catchError((_) {});
+    } else {
+      engine.disconnect();
+    }
+  }
 
   /// Checks if the VPN is currently connected.
-  Future<bool> isConnected() async => await engine.isConnected();
+  Future<bool> isConnected() async {
+    if (await engine.isConnected()) return true;
+    try {
+      final stage = await _wireguard.stage();
+      if (stage.name == 'connected') {
+        _active = VpnProtocol.wireguard;
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
 
   /// Requests the required Android permissions for the VPN service.
   Future<bool> requestPermission() async => await engine.requestPermissionAndroid();

@@ -39,10 +39,11 @@ class VpnConnectorWidget extends HookWidget {
       }
       context.read<HomeBloc>().add(
           ConnectVpn(
-            config: selectedServer.openVPNConfig ?? "",
+            config: selectedServer.activeConfig ?? "",
             country: selectedServer.countryLong ?? "",
             username: selectedServer.username,
             password: selectedServer.password,
+            protocol: selectedServer.protocol,
           )
       );
       serversBloc.add(SaveConnectedServer(connectServer: selectedServer));

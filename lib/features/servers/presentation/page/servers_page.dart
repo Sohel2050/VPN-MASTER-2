@@ -60,10 +60,11 @@ class ServersPage extends HookWidget {
       Future.delayed(const Duration(seconds: 1),(){
         homeBloc.add(
             ConnectVpn(
-              config: vpnServer.openVPNConfig ?? "",
+              config: vpnServer.activeConfig ?? "",
               country: vpnServer.countryLong ?? "",
               username: vpnServer.username,
               password: vpnServer.password,
+              protocol: vpnServer.protocol,
             )
         );
       });

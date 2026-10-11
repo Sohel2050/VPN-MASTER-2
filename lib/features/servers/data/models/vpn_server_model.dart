@@ -27,6 +27,10 @@ class VpnServerModel {
   String? password;
   /// True for your own private servers.
   bool isOwn;
+  /// "openvpn" or "wireguard".
+  String protocol;
+  /// The Base64 encoded WireGuard (wg-quick) configuration.
+  String? wireguardConfigBase64;
 
   /// Creates a [VpnServerModel].
   VpnServerModel({
@@ -41,6 +45,8 @@ class VpnServerModel {
     this.username,
     this.password,
     this.isOwn = false,
+    this.protocol = 'openvpn',
+    this.wireguardConfigBase64,
   });
 
   /// Create from raw JSON string
@@ -64,6 +70,8 @@ class VpnServerModel {
     username: json['Username']?.toString(),
     password: json['Password']?.toString(),
     isOwn: json['IsOwn'] == true,
+    protocol: json['Protocol']?.toString() ?? 'openvpn',
+    wireguardConfigBase64: json['WireGuard_Config_Base64']?.toString(),
   );
 
   /// Convert to JSON Map
@@ -79,6 +87,8 @@ class VpnServerModel {
     'Username': username,
     'Password': password,
     'IsOwn': isOwn,
+    'Protocol': protocol,
+    'WireGuard_Config_Base64': wireguardConfigBase64,
   };
 
   /// Converts the model to a [VpnServerEntity].
@@ -94,6 +104,8 @@ class VpnServerModel {
     username: username,
     password: password,
     isOwn: isOwn,
+    protocol: VpnProtocol.parse(protocol),
+    wireguardConfigBase64: wireguardConfigBase64,
   );
 
 }

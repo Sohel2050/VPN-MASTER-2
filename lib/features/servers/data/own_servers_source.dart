@@ -15,6 +15,9 @@ import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.da
 /// { "servers": [ { "name": "Singapore 1", "country": "Singapore", "country_short": "SG",
 ///   "ip": "203.0.113.10", "username": "", "password": "", "ovpn_base64": "..." } ] }
 /// Use "ovpn" (the plain text of the .ovpn file) instead of "ovpn_base64" if you prefer.
+///
+/// WireGuard server: add "protocol": "wireguard" and the client config (wg-quick text)
+/// as "wg_config" (plain text) or "wg_base64" (Base64). "ovpn" is not needed then.
 class OwnServersSource {
   const OwnServersSource._();
 
@@ -47,9 +50,18 @@ class OwnServersSource {
       final result = <VpnServerEntity>[];
       for (final item in list) {
         if (item is! Map) continue;
+        final protocol = VpnProtocol.parse(item['protocol']?.toString());
+        final isWireGuard = protocol == VpnProtocol.wireguard;
         final base64Config = item['ovpn_base64']?.toString() ??
             (item['ovpn'] != null ? base64Encode(utf8.encode(item['ovpn'].toString())) : null);
-        if (base64Config == null || base64Config.isEmpty) continue;
+        final wgBase64 = item['wg_base64']?.toString() ??
+            (item['wg_config'] != null ? base64Encode(utf8.encode(item['wg_config'].toString())) : null);
+        // A server needs the config that matches its protocol.
+        if (isWireGuard) {
+          if (wgBase64 == null || wgBase64.isEmpty) continue;
+        } else {
+          if (base64Config == null || base64Config.isEmpty) continue;
+        }
         result.add(VpnServerEntity(
           hostname: item['name']?.toString(),
           ip: item['ip']?.toString() ?? item['name']?.toString(),
@@ -58,7 +70,9 @@ class OwnServersSource {
           countryLong: item['country']?.toString(),
           countryShort: item['country_short']?.toString(),
           numVpnSessions: 0,
-          openVPNConfigDataBase64: base64Config,
+          openVPNConfigDataBase64: isWireGuard ? null : base64Config,
+          wireguardConfigBase64: isWireGuard ? wgBase64 : null,
+          protocol: protocol,
           username: item['username']?.toString(),
           password: item['password']?.toString(),
           isOwn: true,

@@ -56,6 +56,7 @@ dependencies:
   webview_flutter: ^4.13.1
   package_info_plus: ^9.0.0
   oneconnect_flutter: ^1.0.5
+  wireguard_flutter: ^0.1.3
   flutter_internet_speed_test_pro: ^1.5.1
 
   # Monetization (Unity LevelPlay mediation + Google UMP consent form)

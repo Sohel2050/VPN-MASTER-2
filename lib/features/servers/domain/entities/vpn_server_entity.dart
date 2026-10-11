@@ -1,5 +1,17 @@
 import 'dart:convert';
 
+/// The VPN protocol a server uses.
+enum VpnProtocol {
+  openvpn,
+  wireguard;
+
+  /// Reads a protocol name such as "wireguard" or "wg" (anything else is OpenVPN).
+  static VpnProtocol parse(String? value) {
+    final v = (value ?? '').trim().toLowerCase();
+    return (v == 'wireguard' || v == 'wg') ? VpnProtocol.wireguard : VpnProtocol.openvpn;
+  }
+}
+
 /// Represents the core data for a VPN server.
 class VpnServerEntity {
   /// The hostname of the VPN server.
@@ -24,6 +36,10 @@ class VpnServerEntity {
   final String? password;
   /// True for your own private servers (shown in the "My Servers" tab).
   final bool isOwn;
+  /// The protocol of this server (OpenVPN is the default).
+  final VpnProtocol protocol;
+  /// The Base64 encoded WireGuard (wg-quick) configuration. Only for WireGuard servers.
+  final String? wireguardConfigBase64;
 
   /// Creates a [VpnServerEntity].
   const VpnServerEntity({
@@ -38,6 +54,8 @@ class VpnServerEntity {
     this.username,
     this.password,
     this.isOwn = false,
+    this.protocol = VpnProtocol.openvpn,
+    this.wireguardConfigBase64,
   });
 
   /// Converts the entity to a JSON map for serialization.
@@ -53,7 +71,23 @@ class VpnServerEntity {
     'Username': username,
     'Password': password,
     'IsOwn': isOwn,
+    'Protocol': protocol.name,
+    'WireGuard_Config_Base64': wireguardConfigBase64,
   };
+
+  /// The decoded WireGuard (wg-quick) configuration, or null when missing or invalid.
+  String? get wireguardConfig {
+    if (wireguardConfigBase64 == null || wireguardConfigBase64!.isEmpty) return null;
+    try {
+      return utf8.decode(base64Decode(wireguardConfigBase64!));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// The config to hand to the VPN service for this server's protocol.
+  String? get activeConfig =>
+      protocol == VpnProtocol.wireguard ? wireguardConfig : openVPNConfig;
 
   /// Decodes the Base64 OpenVPN config and applies necessary compatibility fixes.
   String? get openVPNConfig {
