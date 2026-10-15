@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vpn_master/config/service_locator/service_locator.dart';
+import 'package:vpn_master/core/helpers/blocked_countries.dart';
 import 'package:vpn_master/core/helpers/failed_servers.dart';
 import 'package:vpn_master/core/helpers/helpers.dart';
 import 'package:vpn_master/core/helpers/server_probe.dart';
@@ -104,7 +105,11 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
     result.fold(
             (error)=> null,
             (data){
-              if(data != null) emit(state.copyWith(selectedServer: data));
+              // A saved server from a blocked country (see BlockedCountries) is ignored.
+              if(data != null &&
+                  !BlockedCountries.isBlocked(code: data.countryShort, name: data.countryLong)) {
+                emit(state.copyWith(selectedServer: data));
+              }
             }
     );
   }

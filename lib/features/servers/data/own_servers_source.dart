@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:vpn_master/core/constants/api_urls.dart';
+import 'package:vpn_master/core/helpers/blocked_countries.dart';
 import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
 /// Loads your own (private) VPS servers.
@@ -50,6 +51,11 @@ class OwnServersSource {
       final result = <VpnServerEntity>[];
       for (final item in list) {
         if (item is! Map) continue;
+        // Servers in blocked countries (see BlockedCountries) are never shown.
+        if (BlockedCountries.isBlocked(
+            code: item['country_short']?.toString(), name: item['country']?.toString())) {
+          continue;
+        }
         final protocol = VpnProtocol.parse(item['protocol']?.toString());
         final isWireGuard = protocol == VpnProtocol.wireguard;
         final base64Config = item['ovpn_base64']?.toString() ??

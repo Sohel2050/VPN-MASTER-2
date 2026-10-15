@@ -84,7 +84,7 @@ class ServerItemView extends StatelessWidget {
                   children: [
                     Icon(Icons.lock_outline_rounded, color: context.colors.primary, size: 16.sp),
                     gap4,
-                    Text("Private server", style: context.caption.copyWith(fontSize: 12.sp)),
+                    Text("Our Server", style: context.caption.copyWith(fontSize: 12.sp)),
                   ],
                 )
               : FittedBox(

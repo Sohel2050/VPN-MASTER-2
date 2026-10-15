@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:csv/csv.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:vpn_master/core/helpers/blocked_countries.dart';
 import 'package:vpn_master/features/servers/data/models/vpn_server_model.dart';
 import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
@@ -116,6 +117,9 @@ class Helpers{
         .map((row) => Map.fromIterables(headers, row))
         .map(VpnServerModel.fromJson)
         .where((server) => (server.openVPNConfigDataBase64 ?? '').isNotEmpty)
+        // Servers in blocked countries (see BlockedCountries) are never shown.
+        .where((server) => !BlockedCountries.isBlocked(
+            code: server.countryShort, name: server.countryLong))
         .toList();
   }
 

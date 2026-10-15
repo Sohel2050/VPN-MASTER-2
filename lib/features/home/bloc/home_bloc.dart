@@ -97,9 +97,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
       ToastNotifications.showErrorToast(title: "Connection failed", message: error);
       return;
     }
-    // Many free servers are offline: stop waiting after 40 seconds.
+    // Many free servers are offline: stop waiting after 15 seconds.
     _connectTimeout?.cancel();
-    _connectTimeout = Timer(const Duration(seconds: 40), () {
+    _connectTimeout = Timer(const Duration(seconds: 15), () {
       if (state.vpnStage != VPNStage.connected) add(ConnectionFailed());
     });
   }

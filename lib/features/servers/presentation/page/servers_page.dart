@@ -83,7 +83,52 @@ class ServersPage extends HookWidget {
       return timer.cancel;
     },[]);
 
-    // Tabs: "My Servers" (your own VPS, first) and "Public" (volunteer servers).
+    /// Shows a short "Refreshing" message.
+    void showRefreshing(){
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+          content: Text("Refreshing servers..."),
+          duration: Duration(seconds: 1),
+        ));
+    }
+
+    /// Manual refresh of "Our Servers".
+    void refreshOwnServers(){
+      showRefreshing();
+      serversBloc.add(LoadOwnServers());
+    }
+
+    /// Manual refresh of "Third Party Servers".
+    void refreshThirdPartyServers(){
+      showRefreshing();
+      serversBloc.add(GetVpnServers());
+    }
+
+    /// A row with the text "Manual refresh" and a Refresh button, shown above each list.
+    Widget refreshBar(VoidCallback onRefresh){
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 4.h),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Manual refresh",
+                style: TextStyle(color: context.colors.textSecondary, fontSize: 13.sp),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: onRefresh,
+              icon: Icon(Icons.refresh, size: 18.w),
+              label: const Text("Refresh"),
+              style: TextButton.styleFrom(foregroundColor: context.colors.primary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Tabs: "Our Servers" (your own VPS, first) and "Third Party Servers" (volunteer servers).
     final tabController = useTabController(
       initialLength: 2,
       initialIndex: serversBloc.state.ownServers.isNotEmpty ? 0 : 1,
@@ -94,8 +139,8 @@ class ServersPage extends HookWidget {
       final list = state.ownServers;
       if (list.isEmpty) {
         return const EmptyWidget(
-          title: "No private servers",
-          description: "Add your own servers in own_servers.json",
+          title: "No servers available",
+          description: "Please try again later.",
         );
       }
       return RefreshIndicator(
@@ -112,7 +157,7 @@ class ServersPage extends HookWidget {
                 isOwn: true,
                 isSelected: state.selectedServer?.ip == server.ip,
                 flag: "assets/flags/${server.countryShort?.toLowerCase()}.png",
-                country: server.hostname ?? server.countryLong ?? "Private server",
+                country: server.hostname ?? server.countryLong ?? "Our Server",
                 speed: "",
                 ping: "",
                 users: "",
@@ -142,7 +187,7 @@ class ServersPage extends HookWidget {
                 labelColor: context.colors.primary,
                 unselectedLabelColor: context.colors.textSecondary,
                 dividerColor: Colors.transparent,
-                tabs: const [Tab(text: "My Servers"), Tab(text: "Public")],
+                tabs: const [Tab(text: "Our Servers"), Tab(text: "Third Party Servers")],
               ),
               Expanded(
                 child: TabBarView(
@@ -151,13 +196,21 @@ class ServersPage extends HookWidget {
                     BlocBuilder<ServersBloc, ServersState>(
                       builder: (context, state) => Padding(
                         padding: paddingH12,
-                        child: ownTab(state),
+                        child: Column(
+                          children: [
+                            refreshBar(refreshOwnServers),
+                            Expanded(child: ownTab(state)),
+                          ],
+                        ),
                       ),
                     ),
                     Container(
                   width: 1.sw,
                   height: 1.sh,
                   padding: paddingH12,
+                  child: Column(children: [
+                    refreshBar(refreshThirdPartyServers),
+                    Expanded(
                   // Builds the UI based on the state of the ServersBloc.
                   child: BlocBuilder<ServersBloc, ServersState>(
                     builder: (context, state) {
@@ -221,6 +274,8 @@ class ServersPage extends HookWidget {
                       }
                     },
                   ),
+                    ),
+                  ]),
                 ),
                   ],
                 ),
