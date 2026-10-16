@@ -57,13 +57,15 @@ class SelectedServerWidget extends HookWidget {
                   // Displays the country flag of the selected server.
                   ClipRRect(
                     borderRadius: radiusCircle,
-                    child: Image.asset(
-                      "assets/flags/${(state.selectedServer?.countryShort ?? "au").toLowerCase()}.png",
-                      width: 40.w,
-                      height: 40.w,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(Icons.public, size: 40.w),
-                    ),
+                    child: state.selectedServer == null
+                        ? Icon(Icons.public, size: 40.w, color: context.colors.primary)
+                        : Image.asset(
+                            "assets/flags/${(state.selectedServer?.countryShort ?? "au").toLowerCase()}.png",
+                            width: 40.w,
+                            height: 40.w,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Icon(Icons.public, size: 40.w),
+                          ),
                   ),
 
                   gap12,
@@ -74,7 +76,8 @@ class SelectedServerWidget extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        state.selectedServer?.countryLong ?? "United Kingdom",
+                        state.selectedServer?.countryLong ??
+                            (state.status.isLoading ? "Finding best server..." : "Tap to choose a server"),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.titleMedium.copyWith(
@@ -94,7 +97,9 @@ class SelectedServerWidget extends HookWidget {
                           gap6,
 
                           Text(
-                            Helpers.speedFromBitsPerSecond(state.selectedServer?.speed ?? 0),
+                            state.selectedServer == null
+                                ? "Auto"
+                                : Helpers.speedFromBitsPerSecond(state.selectedServer?.speed ?? 0),
                             style: context.caption,
                           ),
                         ],

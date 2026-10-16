@@ -85,6 +85,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
   /// Initiates a VPN connection with the provided configuration.
   Future<void> _onConnectVpn(ConnectVpn event, Emitter<HomeState> emit) async {
     emit(state.copyWith(vpnStage: VPNStage.connecting, connectionFailed: false));
+    // Safety net: never stay on "Connecting" forever, even if the permission dialog or
+    // the VPN engine never answers.
+    _connectTimeout?.cancel();
+    _connectTimeout = Timer(const Duration(seconds: 45), () {
+      if (state.vpnStage != VPNStage.connected) add(ConnectionFailed());
+    });
     final error = await VpnService.instance.connect(
         config: event.config,
         country: event.country,
@@ -93,6 +99,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
         protocol: event.protocol
     );
     if (error != null) {
+      _connectTimeout?.cancel();
       emit(state.copyWith(vpnStage: VPNStage.disconnected, message: error, connectionFailed: true));
       ToastNotifications.showErrorToast(title: "Connection failed", message: error);
       return;

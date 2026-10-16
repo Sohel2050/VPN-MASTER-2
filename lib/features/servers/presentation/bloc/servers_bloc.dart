@@ -49,6 +49,11 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
               // A silent refresh that fails keeps the old list on screen.
               if (event.silent && state.vpnServers != null) return;
               emit(state.copyWith(status: Status.error, message: error.message));
+              // The third party list could not be loaded: use our own server so the
+              // user can still connect.
+              if (state.selectedServer == null && state.ownServers.isNotEmpty) {
+                emit(state.copyWith(selectedServer: state.ownServers.first));
+              }
             },
             (data){
               // Hide servers that failed before and servers without a valid ping.
@@ -75,19 +80,20 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
   Future<void> _onLoadOwnServers(LoadOwnServers event, Emitter<ServersState> emit) async {
     final own = await OwnServersSource.load();
     if (isClosed) return;
+    // Our servers are only listed here. The default server comes from the third party
+    // list (see _onDefaultServer); our server is used only when that list is not available.
     emit(state.copyWith(ownServers: own));
-    if (state.selectedServer == null && own.isNotEmpty) {
-      emit(state.copyWith(selectedServer: own.first));
-    }
   }
 
-  /// Sets the default server from a list of servers (your own server first).
+  /// Sets the default server: the best third party server. When there is none,
+  /// the first of our own servers is used.
   void _onDefaultServer(DefaultServer event, Emitter<ServersState> emit){
-    if (state.ownServers.isNotEmpty) {
-      emit(state.copyWith(selectedServer: state.ownServers.first));
+    if (event.servers.isEmpty) {
+      if (state.ownServers.isNotEmpty) {
+        emit(state.copyWith(selectedServer: state.ownServers.first));
+      }
       return;
     }
-    if (event.servers.isEmpty) return;
     Helpers.sortServerList(event.servers);
     emit(state.copyWith(selectedServer: event.servers.first));
   }
@@ -174,6 +180,14 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
       vpnServers: remaining,
       ownServers: state.ownServers,
     ));
+    // Nothing left to select: use our own server or reload, so Connect keeps working.
+    if (next == null) {
+      if (state.ownServers.isNotEmpty) {
+        emit(state.copyWith(selectedServer: state.ownServers.first));
+      } else {
+        add(GetVpnServers());
+      }
+    }
   }
 
   /// Saves the currently connected server for future sessions.

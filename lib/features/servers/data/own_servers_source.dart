@@ -8,9 +8,10 @@ import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.da
 
 /// Loads your own (private) VPS servers.
 ///
-/// 1. Tries the online file (ApiUrls.ownServers) so you can add servers without
-///    updating the app.
-/// 2. If that fails, uses assets/config/own_servers.json inside the app.
+/// 1. Online file (ApiUrls.ownServers) is the source of truth. If it loads and is
+///    valid JSON (even { "servers": [] }), that list is final.
+/// 2. Only if GitHub cannot be reached (no internet, 404, error), the bundled
+///    assets/config/own_servers.json is used as an emergency fallback.
 ///
 /// File format:
 /// { "servers": [ { "name": "Singapore 1", "country": "Singapore", "country_short": "SG",
@@ -24,30 +25,37 @@ class OwnServersSource {
 
   /// Returns the list of private servers (empty when none are configured).
   static Future<List<VpnServerEntity>> load() async {
-    String? raw;
+    // 1. Online file is the source of truth. If it was fetched successfully and
+    //    is valid JSON (even { "servers": [] }), that list is final.
     try {
       final response = await Dio(BaseOptions(
         connectTimeout: const Duration(seconds: 8),
         receiveTimeout: const Duration(seconds: 8),
         responseType: ResponseType.plain,
       )).get(ApiUrls.ownServers);
-      raw = response.data?.toString();
-    } catch (_) {}
-
-    var servers = _parse(raw);
-    if (servers.isEmpty) {
-      try {
-        servers = _parse(await rootBundle.loadString('assets/config/own_servers.json'));
-      } catch (_) {}
+      final online = _parse(response.data?.toString());
+      if (online != null) return online;
+    } catch (_) {
+      // No internet / 404 / server error -> fall back to the bundled file.
     }
-    return servers;
+
+    // 2. Emergency fallback: bundled file (only when GitHub could not be reached).
+    try {
+      return _parse(await rootBundle.loadString('assets/config/own_servers.json')) ?? [];
+    } catch (_) {
+      return [];
+    }
   }
 
-  static List<VpnServerEntity> _parse(String? raw) {
-    if (raw == null || raw.trim().isEmpty) return [];
+  /// Returns null when [raw] is not valid (so the caller can fall back),
+  /// or a list (possibly empty) when it is valid.
+  static List<VpnServerEntity>? _parse(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
     try {
       final data = json.decode(raw);
-      final list = (data is Map ? data['servers'] : data) as List? ?? [];
+      final dynamic rawList = data is Map ? data['servers'] : data;
+      if (rawList is! List) return null;
+      final list = rawList;
       final result = <VpnServerEntity>[];
       for (final item in list) {
         if (item is! Map) continue;
@@ -86,7 +94,7 @@ class OwnServersSource {
       }
       return result;
     } catch (_) {
-      return [];
+      return null;
     }
   }
 }

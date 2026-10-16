@@ -24,6 +24,8 @@ class ServerItemView extends StatelessWidget {
   final bool isSelected;
   /// True for your own private server (shows a "Private server" label).
   final bool isOwn;
+  /// True for third party (VPN Gate) servers (shows a "Third Party" badge).
+  final bool isThirdParty;
 
   /// Creates a [ServerItemView].
   const ServerItemView({
@@ -35,6 +37,7 @@ class ServerItemView extends StatelessWidget {
     required this.users,
     required this.isSelected,
     this.isOwn = false,
+    this.isThirdParty = false,
   });
 
   @override
@@ -143,6 +146,21 @@ class ServerItemView extends StatelessWidget {
             Text(
               users,
               style: context.caption,
+            ),
+          ],
+
+          if (isThirdParty) ...[
+            gap8,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                "Third Party",
+                style: TextStyle(color: Colors.orange, fontSize: 10.sp, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
 

@@ -18,10 +18,14 @@ import 'package:vpn_master/features/servers/presentation/bloc/servers_event.dart
 import 'package:vpn_master/features/servers/presentation/widgets/item_view/server_item_view.dart';
 import 'package:vpn_master/features/servers/presentation/widgets/server_loading_widget.dart';
 import 'package:vpn_master/widgets/app_bar/secondary_app_bar.dart';
-import 'package:vpn_master/widgets/ad_slot_widget.dart';
+import 'package:vpn_master/features/servers/presentation/widgets/third_party_server_dialog.dart';
+import 'package:vpn_master/widgets/mrec_ad_widget.dart';
 import 'package:vpn_master/widgets/earth_map_widget.dart';
 import 'package:vpn_master/widgets/empty_widget.dart';
 import 'package:vpn_master/widgets/error_widget/error_widget.dart';
+
+/// Marks an ad row (an MREC ad) between servers.
+enum _AdRow { mrec }
 
 /// A page that displays a list of available VPN servers for the user to select from.
 class ServersPage extends HookWidget {
@@ -128,11 +132,61 @@ class ServersPage extends HookWidget {
       );
     }
 
-    // Tabs: "Our Servers" (your own VPS, first) and "Third Party Servers" (volunteer servers).
-    final tabController = useTabController(
-      initialLength: 2,
-      initialIndex: serversBloc.state.ownServers.isNotEmpty ? 0 : 1,
-    );
+    // Tabs: "Third Party Servers" (volunteer servers, first and opened by default)
+    // and "Our Servers" (your own VPS).
+    final tabController = useTabController(initialLength: 2, initialIndex: 0);
+
+    /// Mixes MREC ad rows into a server list: after the 3rd, 9th, 15th and 21st server
+    /// (at most 4 ads).
+    List<Object> withAds(List<VpnServerEntity> servers){
+      final rows = <Object>[];
+      var adCount = 0;
+      for (var i = 0; i < servers.length; i++) {
+        rows.add(servers[i]);
+        final n = i + 1;
+        if (n >= 3 && (n - 3) % 6 == 0 && adCount < 4 && i < servers.length - 1) {
+          rows.add(_AdRow.mrec);
+          adCount++;
+        }
+      }
+      return rows;
+    }
+
+    /// The widget for one ad row.
+    Widget adWidget(_AdRow row) => const MrecAdWidget();
+
+    /// Shows the third party warning, then connects when the user accepts.
+    Future<void> onThirdPartyTap(VpnServerEntity server) async {
+      final accepted = await showThirdPartyServerDialog(context);
+      if (accepted && context.mounted) connectVpn(server);
+    }
+
+    /// The notice shown above the third party list.
+    Widget thirdPartyNotice(){
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 6.h),
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.7)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 22.w),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                "These servers are run by independent volunteers (VPN Gate), not by us. They may log or inspect your traffic. Do not use them for banking or passwords. Speed and availability vary.",
+                style: TextStyle(color: Colors.orange.shade200, fontSize: 12.sp, height: 1.3),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     /// The list of your own private servers.
     Widget ownTab(ServersState state){
@@ -145,26 +199,32 @@ class ServersPage extends HookWidget {
       }
       return RefreshIndicator(
         onRefresh: () async => serversBloc.add(LoadOwnServers()),
-        child: ListView.builder(
-          itemCount: list.length,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: paddingBottom12,
-          itemBuilder: (context, index) {
-            final server = list[index];
-            return GestureDetector(
-              onTap: () => connectVpn(server),
-              child: ServerItemView(
-                isOwn: true,
-                isSelected: state.selectedServer?.ip == server.ip,
-                flag: "assets/flags/${server.countryShort?.toLowerCase()}.png",
-                country: server.hostname ?? server.countryLong ?? "Our Server",
-                speed: "",
-                ping: "",
-                users: "",
-              ),
-            );
-          },
-        ),
+        child: Builder(builder: (_) {
+          final rows = withAds(list);
+          return ListView.builder(
+            itemCount: rows.length,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: paddingBottom12,
+            itemBuilder: (context, index) {
+              final row = rows[index];
+              if (row is _AdRow) return adWidget(row);
+              final server = row as VpnServerEntity;
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => connectVpn(server),
+                child: ServerItemView(
+                  isOwn: true,
+                  isSelected: state.selectedServer?.ip == server.ip,
+                  flag: "assets/flags/${server.countryShort?.toLowerCase()}.png",
+                  country: server.hostname ?? server.countryLong ?? "Our Server",
+                  speed: "",
+                  ping: "",
+                  users: "",
+                ),
+              );
+            },
+          );
+        }),
       );
     }
 
@@ -187,29 +247,19 @@ class ServersPage extends HookWidget {
                 labelColor: context.colors.primary,
                 unselectedLabelColor: context.colors.textSecondary,
                 dividerColor: Colors.transparent,
-                tabs: const [Tab(text: "Our Servers"), Tab(text: "Third Party Servers")],
+                tabs: const [Tab(text: "Third Party Servers"), Tab(text: "Our Servers")],
               ),
               Expanded(
                 child: TabBarView(
                   controller: tabController,
                   children: [
-                    BlocBuilder<ServersBloc, ServersState>(
-                      builder: (context, state) => Padding(
-                        padding: paddingH12,
-                        child: Column(
-                          children: [
-                            refreshBar(refreshOwnServers),
-                            Expanded(child: ownTab(state)),
-                          ],
-                        ),
-                      ),
-                    ),
                     Container(
                   width: 1.sw,
                   height: 1.sh,
                   padding: paddingH12,
                   child: Column(children: [
                     refreshBar(refreshThirdPartyServers),
+                    thirdPartyNotice(),
                     Expanded(
                   // Builds the UI based on the state of the ServersBloc.
                   child: BlocBuilder<ServersBloc, ServersState>(
@@ -227,24 +277,23 @@ class ServersPage extends HookWidget {
                           // Allows the user to pull-to-refresh the server list.
                           return RefreshIndicator(
                             onRefresh: () async => getVpnServers(),
-                            child: ListView.builder(
-                                // One extra row for the ad slot after the 3rd server.
-                                itemCount: vpnServers.length + (vpnServers.length > 3 ? 1 : 0),
+                            child: Builder(builder: (_) {
+                              final rows = withAds(vpnServers);
+                              return ListView.builder(
+                                itemCount: rows.length,
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: paddingBottom12,
                                 itemBuilder: (context, index) {
+                                  final row = rows[index];
+                                  if (row is _AdRow) return adWidget(row);
+                                  final vpnServer = row as VpnServerEntity;
 
-                                  const adIndex = 3;
-                                  if (vpnServers.length > 3 && index == adIndex) {
-                                    return const AdSlotWidget();
-                                  }
-                                  final serverIndex = (vpnServers.length > 3 && index > adIndex) ? index - 1 : index;
-                                  final vpnServer = vpnServers[serverIndex];
-
-                                  // Handles taps on a server item to initiate connection.
+                                  // A tap shows the third party warning first.
                                   return GestureDetector(
-                                    onTap: ()=> connectVpn(vpnServer),
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => onThirdPartyTap(vpnServer),
                                     child: ServerItemView(
+                                      isThirdParty: true,
                                       isSelected: state.selectedServer?.ip == vpnServer.ip,
                                       flag: "assets/flags/${vpnServer.countryShort?.toLowerCase()}.png",
                                       country: vpnServer.countryLong ?? "N/A",
@@ -253,9 +302,9 @@ class ServersPage extends HookWidget {
                                       users: (vpnServer.numVpnSessions ?? 0).toString(),
                                     ),
                                   );
-
-                                }
-                            ),
+                                },
+                              );
+                            }),
                           );
                         } // If no servers are found, show an empty state widget.
                         else{
@@ -277,6 +326,17 @@ class ServersPage extends HookWidget {
                     ),
                   ]),
                 ),
+                    BlocBuilder<ServersBloc, ServersState>(
+                      builder: (context, state) => Padding(
+                        padding: paddingH12,
+                        child: Column(
+                          children: [
+                            refreshBar(refreshOwnServers),
+                            Expanded(child: ownTab(state)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

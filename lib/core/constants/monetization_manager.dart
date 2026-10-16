@@ -21,10 +21,6 @@ class MonetizationManager {
   /// (Speed and Network). false = the banner is always visible.
   static const bool hideBannerWhenMrec = false;
 
-  /// false = the big ad slot shows MREC (default, no native network yet).
-  /// true  = the same slot shows a Native ad (use after a native network is added).
-  static const bool useNativeAds = false;
-
   /// True when a real MREC ad unit id was filled in.
   static bool get isMrecConfigured =>
       isConfigured && !mrecAdUnitId.startsWith("YOUR_");
@@ -34,10 +30,6 @@ class MonetizationManager {
 
   /// Rewarded ad unit id.
   static const String rewardedAdUnitId = "pilez0cdpcelyvv7";
-
-  /// Native ad unit id (kept for reference: the Flutter plugin loads native ads
-  /// through the LevelPlay placement, it does not take an ad unit id).
-  static const String nativeAdUnitId = "e2adpsiggjgpfl9z";
 
   /// True when real ids were filled in.
   static bool get isConfigured =>

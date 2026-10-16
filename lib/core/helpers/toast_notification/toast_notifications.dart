@@ -22,6 +22,20 @@ class ToastNotifications{
   }
 
 
+  static void showInfoToast({required String title, required String message}) {
+    toastification.show(
+      overlayState: navigatorKey.currentState?.overlay,
+      type: ToastificationType.info,
+      style: ToastificationStyle.minimal,
+      title: Text(title),
+      description: Text(message),
+      autoCloseDuration: const Duration(seconds: 3),
+      alignment: Alignment.topCenter,
+      icon: const Icon(Icons.info),
+    );
+  }
+
+
   static void showErrorToast({required String title, required String message}) {
     toastification.show(
       overlayState: navigatorKey.currentState?.overlay,

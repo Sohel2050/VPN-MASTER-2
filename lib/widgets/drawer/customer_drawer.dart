@@ -152,15 +152,14 @@ class CustomSideDrawer extends HookWidget {
                       title: "Share App",
                       subtitle: "Share with friends",
                       onTap: () {
-                        if (appName.value != null && packageName.value != null) {
-                          String uri = "${TextConstants.playStore}${packageName.value}";
-                          SharePlus.instance.share(ShareParams(
-                            title: "${appName.value} - Your Secure Network",
-                            subject: "Check out ${appName.value} App!",
-                            text: "Check out ${appName.value}, your shield for online privacy. Get it on Google Play: $uri",
-                          ));
-                        }
+                        final name = appName.value ?? "VPN Master";
+                        final uri = "${TextConstants.playStore}${packageName.value ?? "com.albonik.vpnapp"}";
                         Navigator.pop(context);
+                        SharePlus.instance.share(ShareParams(
+                          title: "$name - Your Secure Network",
+                          subject: "Check out $name App!",
+                          text: "Check out $name, your shield for online privacy. Get it on Google Play: $uri",
+                        ));
                       },
                     ),
                     // Launches the Play Store for rating the app.
@@ -169,12 +168,10 @@ class CustomSideDrawer extends HookWidget {
                       title: "Rate Us",
                       subtitle: "Share your experience",
                       onTap: () {
-                        if (packageName.value != null) {
-                          String uri =
-                              "${TextConstants.playStore}${packageName.value}";
-                          Helpers.launchUri(uri: uri);
-                          Navigator.pop(context);
-                        }
+                        final uri =
+                            "${TextConstants.playStore}${packageName.value ?? "com.albonik.vpnapp"}";
+                        Navigator.pop(context);
+                        Helpers.launchUri(uri: uri);
                       },
                     ),
                     gap24,

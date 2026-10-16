@@ -1,15 +1,26 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vpn_master/core/helpers/toast_notification/toast_notifications.dart';
 import 'package:vpn_master/core/services/monetization/monetization_service.dart';
+import 'package:vpn_master/core/services/vpn/vpn_service.dart';
 import 'package:vpn_master/core/utils/extensions/vpn_stage_extension.dart';
 import 'package:vpn_master/features/home/bloc/home_bloc.dart';
 import 'package:vpn_master/features/home/bloc/home_event.dart';
 import 'package:vpn_master/features/servers/presentation/bloc/servers_bloc.dart';
 import 'package:vpn_master/features/servers/presentation/bloc/servers_event.dart';
+import 'package:vpn_master/core/utils/extensions/status_extension.dart';
+
+/// True while a connection attempt is in progress (not yet connected, not failed).
+bool _isBusyStage(HomeState state) {
+  final s = state.vpnStage;
+  return s.isConnecting || s.isPrepare || s.isAuthenticating || s.isWaitConnection ||
+      s.isTcpConnect || s.isUdpConnect || s.isAssignIp || s.isResolve ||
+      s.isGetConfig || s.isVpnGenerateConfig || s.isAuthentication;
+}
 
 /// A widget that displays the main VPN connection button and handles connection logic.
 class VpnConnectorWidget extends HookWidget {
@@ -24,20 +35,41 @@ class VpnConnectorWidget extends HookWidget {
       MonetizationService.showInterstitial();
     }
 
-    /// Connects to the selected VPN server.
-    void connectVpn() async {
+    // How many automatic retries (next server) were made after a failed attempt.
+    // 99 means the user cancelled, so no more retries.
+    final retries = useRef(0);
+
+    /// Connects to the selected VPN server. [auto] is true for an automatic retry.
+    void connectVpn({bool auto = false}) async {
       final serversBloc = context.read<ServersBloc>();
-      final selectedServer = serversBloc.state.selectedServer;
+      final homeBloc = context.read<HomeBloc>();
+      var selectedServer = serversBloc.state.selectedServer;
       if(selectedServer == null){
-        // No server yet (list not loaded): tell the user and try loading again.
-        ToastNotifications.showErrorToast(
-          title: "No server selected",
-          message: "Loading servers, please try again in a moment.",
-        );
+        // No server yet: load the list and wait for it, so the tap is never ignored.
+        if (!auto) {
+          ToastNotifications.showInfoToast(
+            title: "Please wait",
+            message: "Finding the best server...",
+          );
+        }
         serversBloc.add(GetVpnServers());
-        return;
+        try {
+          await serversBloc.stream
+              .firstWhere((s) => s.selectedServer != null || s.status.isError)
+              .timeout(const Duration(seconds: 30));
+        } catch (_) {}
+        selectedServer = serversBloc.state.selectedServer ??
+            (serversBloc.state.ownServers.isNotEmpty ? serversBloc.state.ownServers.first : null);
+        if(selectedServer == null){
+          ToastNotifications.showErrorToast(
+            title: "No server available",
+            message: "Check your internet connection and tap again.",
+          );
+          return;
+        }
+        serversBloc.add(SelectServer(server: selectedServer));
       }
-      context.read<HomeBloc>().add(
+      homeBloc.add(
           ConnectVpn(
             config: selectedServer.activeConfig ?? "",
             country: selectedServer.countryLong ?? "",
@@ -56,16 +88,37 @@ class VpnConnectorWidget extends HookWidget {
 
     // Listens for VPN connection state changes to show ads and rebuilds the UI.
     return BlocConsumer<HomeBloc, HomeState>(
-      // Shows an interstitial ad only after the VPN disconnects (never while connecting).
+      // Interstitial rule: shown (1) when a connection attempt really ended in
+      // "connected" and (2) when a connection that was really connected is disconnected.
+      // Never on a failed or cancelled attempt.
       listenWhen: (previous, current) =>
-          (previous.vpnStage.isConnected && !current.vpnStage.isConnected) ||
+          (_isBusyStage(previous) && current.vpnStage.isConnected) ||
+          (previous.vpnStage.isConnected && !current.vpnStage.isConnected && !current.connectionFailed) ||
           (!previous.connectionFailed && current.connectionFailed),
       listener: (context, state) {
         if (state.connectionFailed) {
           // This server did not connect: hide it and select the next server.
           final serversBloc = context.read<ServersBloc>();
+          final wasOwn = serversBloc.state.selectedServer?.isOwn ?? false;
           serversBloc.add(MarkServerFailed(server: serversBloc.state.selectedServer));
+          // Try the next server automatically (up to 3 times), so the user does not
+          // have to tap again and again. Our own server is not retried.
+          if (!wasOwn && retries.value < 3) {
+            retries.value++;
+            Future.delayed(const Duration(milliseconds: 1500), () {
+              if (context.mounted && retries.value < 99) connectVpn(auto: true);
+            });
+          }
+        } else if (state.vpnStage.isConnected) {
+          // Wait a moment, then check that the VPN is still really connected.
+          Future.delayed(const Duration(milliseconds: 1500), () async {
+            if (!context.mounted) return;
+            final stillConnected = context.read<HomeBloc>().state.vpnStage.isConnected &&
+                await VpnService.instance.isConnected();
+            if (stillConnected) showInterstitial();
+          });
         } else {
+          // A connection that was really connected has ended.
           showInterstitial();
         }
       },
@@ -93,7 +146,17 @@ class VpnConnectorWidget extends HookWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             // Toggles between connecting and disconnecting the VPN on tap.
-            onTap: () => (connected || busy) ? disconnectVpn() : connectVpn(),
+            onTap: () {
+              // Instant feedback so the tap never feels ignored.
+              HapticFeedback.mediumImpact();
+              if (connected || busy) {
+                retries.value = 99; // the user cancelled: no automatic retry
+                disconnectVpn();
+              } else {
+                retries.value = 0;
+                connectVpn();
+              }
+            },
             // Outer thin gold ring.
             child: Container(
               width: 170.w,
@@ -114,10 +177,45 @@ class VpnConnectorWidget extends HookWidget {
                     color: connected ? gold : const Color(0xFF3A3220),
                   ),
                 ),
-                child: Icon(
-                  connected ? Icons.verified_user_rounded : Icons.shield_outlined,
-                  size: 64.w,
-                  color: connected ? obsidian : gold,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // A spinning ring while connecting.
+                    if (busy)
+                      SizedBox(
+                        width: 136.w,
+                        height: 136.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: AlwaysStoppedAnimation<Color>(gold),
+                        ),
+                      ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          connected ? Icons.verified_user_rounded : Icons.shield_outlined,
+                          size: 52.w,
+                          color: connected ? obsidian : gold,
+                        ),
+                        SizedBox(height: 6.h),
+                        Text(
+                          connected
+                              ? "TAP TO DISCONNECT"
+                              : busy
+                                  ? "CONNECTING...\nTAP TO CANCEL"
+                                  : "TAP TO CONNECT",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: connected ? obsidian : gold,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

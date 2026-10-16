@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:csv/csv.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:vpn_master/core/helpers/toast_notification/toast_notifications.dart';
 import 'package:vpn_master/core/helpers/blocked_countries.dart';
 import 'package:vpn_master/features/servers/data/models/vpn_server_model.dart';
 import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
@@ -126,14 +127,18 @@ class Helpers{
 
   /// Opens [uri] in the browser / Play Store. Never throws.
   static Future<void> launchUri({required String uri}) async {
-    try {
-      await launchUrl(
-        Uri.parse(uri),
-        mode: LaunchMode.externalApplication, // Opens in browser or relevant app
-      );
-    } catch (_) {
-      // Nothing can open this link on the device; ignore silently.
+    final parsed = Uri.parse(uri);
+    // Try the external app first, then the default mode (the device may have no Play Store).
+    for (final mode in [LaunchMode.externalApplication, LaunchMode.platformDefault]) {
+      try {
+        if (await launchUrl(parsed, mode: mode)) return;
+      } catch (_) {}
     }
+    // Never fail silently: tell the user the tap was received.
+    ToastNotifications.showErrorToast(
+      title: "Cannot open link",
+      message: "No app on this device can open this link.",
+    );
   }
 
 }

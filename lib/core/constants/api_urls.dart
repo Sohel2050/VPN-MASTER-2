@@ -16,7 +16,7 @@ class ApiUrls {
   static const String serversSecure = "https://www.vpngate.net/api/iphone";
 
   /// Your own (private) VPS servers list. Host a file named own_servers.json here.
-  /// If it cannot be loaded, assets/config/own_servers.json inside the app is used.
+  /// The online file is final when it loads (even empty). The bundled file is used only if GitHub is unreachable.
   static const String ownServers =
       "https://raw.githubusercontent.com/Sohel2050/Vpn2-version-controller/main/own_servers.json";
 
