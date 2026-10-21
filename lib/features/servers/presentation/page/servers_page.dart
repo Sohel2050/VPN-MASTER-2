@@ -6,9 +6,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/helpers/server_probe.dart';
+import 'package:vpn_master/core/helpers/toast_notification/toast_notifications.dart';
 import 'package:vpn_master/core/utils/extensions/null_empty_extension.dart';
 import 'package:vpn_master/core/utils/extensions/status_extension.dart';
 import 'package:vpn_master/core/utils/extensions/theme_extension.dart';
+import 'package:vpn_master/core/utils/extensions/vpn_stage_extension.dart';
 import 'package:vpn_master/core/utils/ui_helpers/paddings.dart';
 import 'package:vpn_master/features/home/bloc/home_bloc.dart';
 import 'package:vpn_master/features/home/bloc/home_event.dart';
@@ -19,6 +22,7 @@ import 'package:vpn_master/features/servers/presentation/widgets/item_view/serve
 import 'package:vpn_master/features/servers/presentation/widgets/server_loading_widget.dart';
 import 'package:vpn_master/widgets/app_bar/secondary_app_bar.dart';
 import 'package:vpn_master/features/servers/presentation/widgets/third_party_server_dialog.dart';
+import 'package:vpn_master/widgets/banner_ad_widget.dart';
 import 'package:vpn_master/widgets/mrec_ad_widget.dart';
 import 'package:vpn_master/widgets/earth_map_widget.dart';
 import 'package:vpn_master/widgets/empty_widget.dart';
@@ -46,6 +50,10 @@ class ServersPage extends HookWidget {
     final serversBloc = context.read<ServersBloc>();
     final homeBloc = context.read<HomeBloc>();
 
+    // True while a connection started from this page is in progress. The page stays
+    // open until the VPN is connected (or every automatic attempt has failed).
+    final waiting = useState(false);
+
     /// Fetches the list of VPN servers.
     void getVpnServers() {
       serversBloc.add(GetVpnServers());
@@ -58,10 +66,32 @@ class ServersPage extends HookWidget {
       serversBloc.add(SelectServer(server: vpnServer));
       serversBloc.add(SaveConnectedServer(connectServer: vpnServer));
 
+      // Stay on this page and wait for the result.
+      waiting.value = true;
+      // Backstop only: the connection attempt itself stops after 15 seconds.
+      Future.delayed(const Duration(seconds: 30), () {
+        if (context.mounted) waiting.value = false;
+      });
+
       // Disconnects from any existing connection before establishing a new one.
       homeBloc.add(DisconnectVpn());
       // A delay to allow the disconnection to complete before initiating a new connection.
-      Future.delayed(const Duration(seconds: 1),(){
+      Future.delayed(const Duration(seconds: 1), () async {
+        // Quick check right before connecting: a dead third party server is removed
+        // and the user stays on the list to choose another one.
+        if (!vpnServer.isOwn) {
+          final alive = await ServerProbe.verify(vpnServer);
+          if (!alive) {
+            waiting.value = false;
+            serversBloc.add(MarkServerFailed(server: vpnServer));
+            ToastNotifications.showErrorToast(
+              title: "Server not responding",
+              message: "This server is offline. Please choose another server.",
+            );
+            return;
+          }
+        }
+        if (!waiting.value) return; // the user pressed Cancel
         homeBloc.add(
             ConnectVpn(
               config: vpnServer.activeConfig ?? "",
@@ -73,8 +103,6 @@ class ServersPage extends HookWidget {
         );
       });
 
-      // Returns to the previous page.
-      context.pop();
     }
 
     // Refreshes the server list as soon as the page opens, then every 10 seconds.
@@ -106,6 +134,8 @@ class ServersPage extends HookWidget {
     /// Manual refresh of "Third Party Servers".
     void refreshThirdPartyServers(){
       showRefreshing();
+      // Forget all old test results: every server is tested again from zero.
+      ServerProbe.reset();
       serversBloc.add(GetVpnServers());
     }
 
@@ -229,7 +259,35 @@ class ServersPage extends HookWidget {
     }
 
     // The main layout of the page.
-    return Scaffold(
+    return BlocListener<HomeBloc, HomeState>(
+      listenWhen: (p, c) =>
+          p.vpnStage != c.vpnStage || p.connectionFailed != c.connectionFailed,
+      listener: (context, state) {
+        if (!waiting.value) return;
+        if (state.vpnStage.isConnected) {
+          // Connected: go back to the home screen.
+          waiting.value = false;
+          if (context.canPop()) context.pop();
+        } else if (state.connectionFailed) {
+          // The server did not connect within 15 seconds: stay on the list and ask the
+          // user to choose another server.
+          waiting.value = false;
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text("Connection failed"),
+              content: const Text("Try another server please."),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text("OK"),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      child: Scaffold(
       appBar: const SecondaryAppBar(title: "Servers Location"),
       backgroundColor: context.colors.secondaryBackground,
       body: Stack(
@@ -241,6 +299,8 @@ class ServersPage extends HookWidget {
 
           Column(
             children: [
+              // Banner ad below the title and above the tabs.
+              const BannerAdWidget(),
               TabBar(
                 controller: tabController,
                 indicatorColor: context.colors.primary,
@@ -344,7 +404,36 @@ class ServersPage extends HookWidget {
             ],
           ),
 
+          // Shown while connecting: the user waits here until connected.
+          if (waiting.value)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.65),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Connecting...",
+                      style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                    ),
+                    SizedBox(height: 12.h),
+                    TextButton(
+                      onPressed: () {
+                        waiting.value = false;
+                        homeBloc.add(DisconnectVpn());
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
         ],
+      ),
       ),
     );
   }

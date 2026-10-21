@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:hive/hive.dart';
+import 'package:vpn_master/core/constants/local_database_keys.dart';
 import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 
 /// Checks if a VPN server is really alive BEFORE the user taps connect.
@@ -16,12 +18,46 @@ import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.da
 class ServerProbe {
   const ServerProbe._();
 
+  /// A server that answered is trusted for 10 minutes (memory only).
   static const Duration _ttl = Duration(minutes: 10);
   static final Map<String, _Result> _cache = {};
+
+  /// A server that did NOT answer is hidden for 24 hours (saved on the phone, so it
+  /// also survives closing the app).
+  static const Duration _deadTtl = Duration(hours: 24);
+  static const String _deadKey = "deadServers";
+  static Map<String, int>? _dead;
+
+  static Map<String, int> _deadMap() {
+    final cached = _dead;
+    if (cached != null) return cached;
+    var map = <String, int>{};
+    try {
+      final raw = Hive.box(LocalDatabaseKeys.database).get(_deadKey);
+      if (raw != null) {
+        map = Map<String, int>.from(raw as Map);
+        final limit = DateTime.now().subtract(_deadTtl).millisecondsSinceEpoch;
+        map.removeWhere((_, time) => time < limit);
+      }
+    } catch (_) {}
+    return _dead = map;
+  }
+
+  static void _saveDead() {
+    try {
+      Hive.box(LocalDatabaseKeys.database).put(_deadKey, _deadMap());
+    } catch (_) {}
+  }
 
   /// true = alive, false = dead, null = not tested yet (or the result is too old).
   static bool? knownResult(String? ip) {
     if (ip == null) return null;
+    final deadAt = _deadMap()[ip];
+    if (deadAt != null) {
+      final age = DateTime.now().millisecondsSinceEpoch - deadAt;
+      if (age <= _deadTtl.inMilliseconds) return false;
+      _deadMap().remove(ip);
+    }
     final r = _cache[ip];
     if (r == null) return null;
     if (DateTime.now().difference(r.time) > _ttl) {
@@ -31,18 +67,57 @@ class ServerProbe {
     return r.alive;
   }
 
+  /// Forgets every test result (used by the manual Refresh button), so all servers
+  /// are tested again from zero.
+  static void reset() {
+    _cache.clear();
+    _deadMap().clear();
+    _saveDead();
+  }
+
+  /// Quick test of ONE server right before connecting. Returns true when it answers.
+  static Future<bool> verify(VpnServerEntity server) async {
+    final ip = server.ip;
+    final alive = await _probe(server);
+    if (ip != null) {
+      if (alive) {
+        _deadMap().remove(ip);
+        _cache[ip] = _Result(true, DateTime.now());
+      } else {
+        _cache.remove(ip);
+        _deadMap()[ip] = DateTime.now().millisecondsSinceEpoch;
+      }
+      _saveDead();
+    }
+    return alive;
+  }
+
   /// Servers that were not tested yet, best servers first.
   static List<VpnServerEntity> pending(List<VpnServerEntity> servers) =>
       servers.where((s) => knownResult(s.ip) == null).toList();
 
   /// Tests [batch] at the same time and remembers the results.
   static Future<void> probeBatch(List<VpnServerEntity> batch) async {
+    final results = <String, bool>{};
     await Future.wait(batch.map((s) async {
       final ip = s.ip;
       if (ip == null) return;
-      final alive = await _probe(s);
-      _cache[ip] = _Result(alive, DateTime.now());
+      results[ip] = await _probe(s);
     }));
+    // If not even one server of a big group answered, the phone is most likely offline
+    // or blocks the test. Do not mark good servers as dead for 24 hours because of that.
+    if (batch.length >= 5 && !results.values.any((alive) => alive)) return;
+    final now = DateTime.now();
+    var deadChanged = false;
+    results.forEach((ip, alive) {
+      if (alive) {
+        _cache[ip] = _Result(true, now);
+      } else {
+        _deadMap()[ip] = now.millisecondsSinceEpoch;
+        deadChanged = true;
+      }
+    });
+    if (deadChanged) _saveDead();
   }
 
   static ({String host, int port, bool tcp})? _target(VpnServerEntity server) {

@@ -4,7 +4,7 @@ description: "VPN Master - fast and secure VPN app."
 publish_to: 'none'
 
 # The version of the application.
-version: 1.0.8+8
+version: 1.0.9+9
 
 environment:
   sdk: ^3.10.4

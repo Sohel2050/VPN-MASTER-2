@@ -7,6 +7,7 @@ import 'package:vpn_master/core/helpers/helpers.dart';
 import 'package:vpn_master/core/helpers/server_probe.dart';
 import 'package:vpn_master/core/services/vpn/vpn_service.dart';
 import 'package:vpn_master/core/utils/enums/enums.dart';
+import 'package:vpn_master/core/utils/extensions/status_extension.dart';
 import 'package:vpn_master/features/servers/data/own_servers_source.dart';
 import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 import 'package:vpn_master/features/servers/domain/usecases/get_connected_server_usecase.dart';
@@ -37,6 +38,10 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
   /// Handles the [GetVpnServers] event, fetching the list of available VPN servers.
   bool _fetching = false;
 
+  /// Every server of the last download that is not known to be dead. Only the ones
+  /// that really answered (see ServerProbe) are shown in the list.
+  List<VpnServerEntity> _candidates = [];
+
   Future<void> _onGetServers(GetVpnServers event, Emitter<ServersState> emit) async{
     // A refresh is already running: do not start another one.
     if (_fetching) return;
@@ -66,10 +71,23 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
               if (list.isEmpty) {
                 list = data.where((s) => !FailedServers.isFailed(s.ip)).toList();
               }
-              emit(state.copyWith(
-                  status: Status.success,
-                  vpnServers: list,
-              ));
+              _candidates = list;
+              // Show ONLY active servers: the ones that answered the test, and the ones
+              // already on screen that were not proven dead (so the list does not blink).
+              final shownBefore = (state.vpnServers ?? <VpnServerEntity>[]).map((s) => s.ip).toSet();
+              final active = list.where((s) {
+                final r = ServerProbe.knownResult(s.ip);
+                return r == true || (r == null && shownBefore.contains(s.ip));
+              }).toList();
+              if (active.isEmpty) {
+                // Nothing verified yet: keep the loading animation until the first
+                // test results arrive (see _onProbeServers).
+                if (!event.silent || (state.vpnServers ?? []).isEmpty) {
+                  emit(state.copyWith(status: Status.loading));
+                }
+              } else {
+                emit(state.copyWith(status: Status.success, vpnServers: active));
+              }
               // Test the servers in the background and hide the dead ones.
               add(ProbeServers());
             }
@@ -122,14 +140,21 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
 
   bool _probing = false;
 
-  /// Tests servers in groups of 25 (best servers first) and removes dead ones.
+  /// Tests servers in groups of 25 (best servers first). Only servers that answered
+  /// are shown, and they appear in the list as soon as each group is finished.
   Future<void> _onProbeServers(ProbeServers event, Emitter<ServersState> emit) async {
     if (_probing) return;
     // While the VPN is on, the tests would go through the tunnel and be unreliable.
-    if (await VpnService.instance.isConnected()) return;
+    if (await VpnService.instance.isConnected()) {
+      // Cannot test now: make sure the list is not stuck on the loading animation.
+      if ((state.vpnServers ?? []).isEmpty && _candidates.isNotEmpty) {
+        emit(state.copyWith(status: Status.success, vpnServers: _candidates));
+      }
+      return;
+    }
     _probing = true;
     try {
-      final sorted = List<VpnServerEntity>.from(state.vpnServers ?? []);
+      final sorted = List<VpnServerEntity>.from(_candidates);
       Helpers.sortServerList(sorted);
       final todo = ServerProbe.pending(sorted);
       for (var i = 0; i < todo.length; i += 25) {
@@ -137,21 +162,27 @@ class ServersBloc extends Bloc<ServersEvent, ServersState>{
         await ServerProbe.probeBatch(todo.skip(i).take(25).toList());
         if (isClosed || emit.isDone) return;
         final current = state.vpnServers ?? <VpnServerEntity>[];
-        final alive = current.where((s) => ServerProbe.knownResult(s.ip) != false).toList();
-        // Never empty the list (for example when the network blocks every probe).
-        if (alive.isEmpty || alive.length == current.length) continue;
+        final alive = sorted.where((s) => ServerProbe.knownResult(s.ip) == true).toList();
+        if (alive.isEmpty) continue;
+        final sameList = alive.length == current.length &&
+            alive.every((s) => current.any((c) => c.ip == s.ip));
+        if (sameList && state.status.isSuccess) continue;
         var next = state.selectedServer;
-        if (next != null && ServerProbe.knownResult(next.ip) == false) {
-          Helpers.sortServerList(alive);
+        if (next != null && !next.isOwn && ServerProbe.knownResult(next.ip) == false) {
           next = alive.first;
         }
         emit(ServersState(
           message: state.message,
-          status: state.status,
+          status: Status.success,
           selectedServer: next,
           vpnServers: alive,
           ownServers: state.ownServers,
         ));
+      }
+      // No server answered at all (the phone may be offline or blocks the test):
+      // show the downloaded list anyway, so the screen is never empty.
+      if (!isClosed && !emit.isDone && (state.vpnServers ?? []).isEmpty && sorted.isNotEmpty) {
+        emit(state.copyWith(status: Status.success, vpnServers: sorted));
       }
     } finally {
       _probing = false;

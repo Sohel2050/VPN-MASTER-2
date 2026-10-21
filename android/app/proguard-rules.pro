@@ -18,6 +18,13 @@
 -keep class de.blinkt.openvpn.** { *; }
 -keep class com.oneconnect.** { *; }
 -dontwarn de.blinkt.openvpn.**
+-keepclasseswithmembernames class * { native <methods>; }
+
+# ---------- WireGuard ----------
+-keep class com.wireguard.** { *; }
+-dontwarn com.wireguard.**
+-keep class org.strongswan.** { *; }
+-dontwarn org.strongswan.**
 
 # ---------- Unity LevelPlay (ironSource) ----------
 -keep class com.ironsource.** { *; }

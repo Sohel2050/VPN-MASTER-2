@@ -18,6 +18,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
 
   Timer? _connectTimeout;
 
+
   @override
   Future<void> close() {
     _connectTimeout?.cancel();
@@ -100,8 +101,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
     );
     if (error != null) {
       _connectTimeout?.cancel();
-      emit(state.copyWith(vpnStage: VPNStage.disconnected, message: error, connectionFailed: true));
-      ToastNotifications.showErrorToast(title: "Connection failed", message: error);
+      // The user pressed Cancel on the Android VPN permission dialog: this is not the
+      // server's fault, so do not hide the server and do not retry automatically.
+      final permissionDenied = error.toLowerCase().contains("permission");
+      emit(state.copyWith(
+        vpnStage: VPNStage.disconnected,
+        message: error,
+        connectionFailed: !permissionDenied,
+      ));
+      ToastNotifications.showErrorToast(
+        title: permissionDenied ? "Permission needed" : "Connection failed",
+        message: error,
+      );
       return;
     }
     // Many free servers are offline: stop waiting after 15 seconds.
@@ -124,7 +135,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
     ));
     ToastNotifications.showErrorToast(
       title: "Server failed",
-      message: "This server did not connect. The next server was selected.",
+      message: "This server did not connect. Try another server please.",
     );
   }
 

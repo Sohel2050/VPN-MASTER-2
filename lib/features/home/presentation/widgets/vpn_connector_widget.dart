@@ -99,16 +99,8 @@ class VpnConnectorWidget extends HookWidget {
         if (state.connectionFailed) {
           // This server did not connect: hide it and select the next server.
           final serversBloc = context.read<ServersBloc>();
-          final wasOwn = serversBloc.state.selectedServer?.isOwn ?? false;
           serversBloc.add(MarkServerFailed(server: serversBloc.state.selectedServer));
-          // Try the next server automatically (up to 3 times), so the user does not
-          // have to tap again and again. Our own server is not retried.
-          if (!wasOwn && retries.value < 3) {
-            retries.value++;
-            Future.delayed(const Duration(milliseconds: 1500), () {
-              if (context.mounted && retries.value < 99) connectVpn(auto: true);
-            });
-          }
+          // No automatic connection to another server: the user chooses.
         } else if (state.vpnStage.isConnected) {
           // Wait a moment, then check that the VPN is still really connected.
           Future.delayed(const Duration(milliseconds: 1500), () async {

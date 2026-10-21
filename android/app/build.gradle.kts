@@ -39,6 +39,14 @@ android {
         multiDexEnabled = true
     }
 
+    packaging {
+        jniLibs {
+            // OpenVPN core runs native binaries from nativeLibraryDir, so the
+            // libs must be extracted on install (needed for Play Store AAB installs).
+            useLegacyPackaging = true
+        }
+    }
+
     signingConfigs {
         create("release") {
             if (keystorePropertiesFile.exists()) {
