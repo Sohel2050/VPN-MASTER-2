@@ -82,6 +82,8 @@ android {
         implementation("com.google.android.gms:play-services-appset:16.0.2")
         implementation("com.google.android.gms:play-services-ads-identifier:18.0.1")
         implementation("com.google.android.gms:play-services-basement:18.3.0")
+        // Newer WireGuard tunnel library: its native libs support 16 KB memory pages.
+        implementation("com.wireguard.android:tunnel:1.0.20260102")
     }
 }
 

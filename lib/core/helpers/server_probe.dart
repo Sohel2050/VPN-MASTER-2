@@ -9,9 +9,9 @@ import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.da
 
 /// Checks if a VPN server is really alive BEFORE the user taps connect.
 ///
-/// - TCP servers: a TCP connection to the server's OpenVPN port must open.
-/// - UDP servers: an OpenVPN "hard reset" packet is sent and the server must answer
-///   (VPN Gate configs do not use tls-auth, so a live server always replies).
+/// - UDP and TCP servers: an OpenVPN "hard reset" packet is sent and the server must
+///   answer like an OpenVPN server (VPN Gate configs do not use tls-auth, so a live
+///   server always replies).
 ///
 /// This proves the server port is alive. A server can still fail later (for example a
 /// cipher problem), so servers that fail to connect are also hidden afterwards.
@@ -150,13 +150,44 @@ class ServerProbe {
         : _probeUdp(target.host, target.port);
   }
 
+  /// OpenVPN "hard reset" packet: opcode, random session id, no acks, packet id 0.
+  static Uint8List _hardReset() {
+    final random = Random.secure();
+    final packet = Uint8List(14);
+    packet[0] = 0x38; // P_CONTROL_HARD_RESET_CLIENT_V2
+    for (var i = 1; i <= 8; i++) {
+      packet[i] = random.nextInt(256);
+    }
+    return packet;
+  }
+
+  /// A real OpenVPN server answers a hard reset with P_CONTROL_HARD_RESET_SERVER_V2 (8)
+  /// (or _V1 = 2). Any other answer means it is not an OpenVPN server.
+  static bool _isOpenVpnReply(int firstByte) {
+    final opcode = firstByte >> 3;
+    return opcode == 8 || opcode == 2;
+  }
+
+  /// TCP: the port must open AND the server must answer like OpenVPN (an open port
+  /// alone proves nothing: it can be a web server or a blocked / hijacked port).
   static Future<bool> _probeTcp(String host, int port) async {
+    Socket? socket;
     try {
-      final socket = await Socket.connect(host, port, timeout: const Duration(seconds: 3));
-      socket.destroy();
-      return true;
+      socket = await Socket.connect(host, port, timeout: const Duration(seconds: 3));
+      final packet = _hardReset();
+      // OpenVPN over TCP: every packet starts with a 2 byte length.
+      final framed = Uint8List(packet.length + 2);
+      framed[0] = (packet.length >> 8) & 0xff;
+      framed[1] = packet.length & 0xff;
+      framed.setRange(2, framed.length, packet);
+      socket.add(framed);
+      await socket.flush();
+      final reply = await socket.first.timeout(const Duration(seconds: 4));
+      return reply.length >= 3 && _isOpenVpnReply(reply[2]);
     } catch (_) {
       return false;
+    } finally {
+      socket?.destroy();
     }
   }
 
@@ -172,18 +203,13 @@ class ServerProbe {
         if (event == RawSocketEvent.read) {
           final datagram = socket?.receive();
           if (datagram != null && datagram.data.isNotEmpty && !answered.isCompleted) {
-            answered.complete(true);
+            answered.complete(_isOpenVpnReply(datagram.data[0]));
           }
         }
       });
 
       // OpenVPN P_CONTROL_HARD_RESET_CLIENT_V2: opcode, session id, no acks, packet id 0.
-      final random = Random.secure();
-      final packet = Uint8List(14);
-      packet[0] = 0x38;
-      for (var i = 1; i <= 8; i++) {
-        packet[i] = random.nextInt(256);
-      }
+      final packet = _hardReset();
       socket.send(packet, address, port);
       // One more try after 1.5 seconds in case the first packet was lost.
       resend = Timer(const Duration(milliseconds: 1500), () => socket?.send(packet, address, port));

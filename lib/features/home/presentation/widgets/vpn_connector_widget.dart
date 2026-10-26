@@ -4,12 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:vpn_master/core/helpers/helpers.dart';
+import 'package:vpn_master/core/helpers/server_probe.dart';
 import 'package:vpn_master/core/helpers/toast_notification/toast_notifications.dart';
 import 'package:vpn_master/core/services/monetization/monetization_service.dart';
 import 'package:vpn_master/core/services/vpn/vpn_service.dart';
 import 'package:vpn_master/core/utils/extensions/vpn_stage_extension.dart';
 import 'package:vpn_master/features/home/bloc/home_bloc.dart';
 import 'package:vpn_master/features/home/bloc/home_event.dart';
+import 'package:vpn_master/features/servers/domain/entities/vpn_server_entity.dart';
 import 'package:vpn_master/features/servers/presentation/bloc/servers_bloc.dart';
 import 'package:vpn_master/features/servers/presentation/bloc/servers_event.dart';
 import 'package:vpn_master/core/utils/extensions/status_extension.dart';
@@ -69,6 +72,47 @@ class VpnConnectorWidget extends HookWidget {
         }
         serversBloc.add(SelectServer(server: selectedServer));
       }
+      // Quick check right before connecting: a dead third party server is never used.
+      // The next best server that really answers is used instead (max 3 tries).
+      if (!selectedServer.isOwn && selectedServer.protocol == VpnProtocol.openvpn &&
+          ServerProbe.knownResult(selectedServer.ip) != true) {
+        ToastNotifications.showInfoToast(
+          title: "Please wait",
+          message: "Checking the server...",
+        );
+        VpnServerEntity? alive;
+        if (await ServerProbe.verify(selectedServer)) {
+          alive = selectedServer;
+        } else {
+          serversBloc.add(MarkServerFailed(server: selectedServer));
+          final others = List<VpnServerEntity>.from(serversBloc.state.vpnServers ?? [])
+              .where((s) => s.ip != selectedServer!.ip && !s.isOwn && s.protocol == VpnProtocol.openvpn)
+              .toList();
+          Helpers.sortServerList(others);
+          for (final candidate in others.take(3)) {
+            if (await ServerProbe.verify(candidate)) {
+              alive = candidate;
+              break;
+            }
+            serversBloc.add(MarkServerFailed(server: candidate));
+          }
+        }
+        if (alive == null) {
+          ToastNotifications.showErrorToast(
+            title: "No server available",
+            message: "These servers are offline. Please refresh the list or try again later.",
+          );
+          return;
+        }
+        if (alive.ip != selectedServer.ip) {
+          ToastNotifications.showInfoToast(
+            title: "Server was offline",
+            message: "Connecting to another server...",
+          );
+          selectedServer = alive;
+          serversBloc.add(SelectServer(server: alive));
+        }
+      }
       homeBloc.add(
           ConnectVpn(
             config: selectedServer.activeConfig ?? "",
@@ -88,12 +132,13 @@ class VpnConnectorWidget extends HookWidget {
 
     // Listens for VPN connection state changes to show ads and rebuilds the UI.
     return BlocConsumer<HomeBloc, HomeState>(
-      // Interstitial rule: shown (1) when a connection attempt really ended in
-      // "connected" and (2) when a connection that was really connected is disconnected.
-      // Never on a failed or cancelled attempt.
+      // Interstitial rule: shown (1) only AFTER a connection attempt really ended in
+      // "connected" (and is still connected), and (2) when a connected VPN is turned off.
+      // Never when a connection starts (also not when switching server while connected),
+      // and never on a failed or cancelled attempt.
       listenWhen: (previous, current) =>
           (_isBusyStage(previous) && current.vpnStage.isConnected) ||
-          (previous.vpnStage.isConnected && !current.vpnStage.isConnected && !current.connectionFailed) ||
+          (previous.vpnStage.isConnected && current.vpnStage.isDisconnected && !current.connectionFailed) ||
           (!previous.connectionFailed && current.connectionFailed),
       listener: (context, state) {
         if (state.connectionFailed) {
@@ -102,14 +147,18 @@ class VpnConnectorWidget extends HookWidget {
           serversBloc.add(MarkServerFailed(server: serversBloc.state.selectedServer));
           // No automatic connection to another server: the user chooses.
         } else if (state.vpnStage.isConnected) {
-          // Wait a moment, then check that the VPN is still really connected.
+          // Connection confirmed: wait a moment so the "Connected" screen shows first,
+          // then check again that the VPN is still really connected before the ad.
           Future.delayed(const Duration(milliseconds: 1500), () async {
             if (!context.mounted) return;
             final stillConnected = context.read<HomeBloc>().state.vpnStage.isConnected &&
                 await VpnService.instance.isConnected();
-            if (stillConnected) showInterstitial();
+            if (!context.mounted) return;
+            // A new connect/disconnect may have started during the wait: then no ad.
+            final stageNow = context.read<HomeBloc>().state.vpnStage;
+            if (stillConnected && stageNow.isConnected) showInterstitial();
           });
-        } else {
+        } else if (state.vpnStage.isDisconnected) {
           // A connection that was really connected has ended.
           showInterstitial();
         }

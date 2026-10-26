@@ -41,8 +41,9 @@ class SplashPage extends HookWidget {
           color: const Color(0xff04123F),
           child: Image.asset(
             "assets/icons/splash_icon.png",
-            width: 512.w,
-            height: 512.w,
+            // Same size as the native splash (140 dp), so the logo never jumps or grows.
+            width: 140,
+            height: 140,
           ),
         ),
       )

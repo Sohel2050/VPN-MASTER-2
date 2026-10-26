@@ -110,6 +110,16 @@ class CustomSideDrawer extends HookWidget {
                 child: ListView(
                   children: [
                     gap12,
+                    // Opens the developer page on Google Play to show more apps.
+                    DrawerOptionTile(
+                      icon: Icons.apps_rounded,
+                      title: "More Apps",
+                      subtitle: "Discover our other apps",
+                      onTap: () {
+                        Navigator.pop(context);
+                        Helpers.launchUri(uri: TextConstants.moreAppsUrl);
+                      },
+                    ),
                     // Opens the in-app Privacy Policy.
                     DrawerOptionTile(
                       icon: Icons.privacy_tip_outlined,
@@ -134,16 +144,6 @@ class CustomSideDrawer extends HookWidget {
                           LegalPage.name,
                           queryParameters: {"type": "terms"},
                         );
-                      },
-                    ),
-                    // Opens the developer page on Google Play to show more apps.
-                    DrawerOptionTile(
-                      icon: Icons.apps_rounded,
-                      title: "More Apps",
-                      subtitle: "Discover our other apps",
-                      onTap: () {
-                        Navigator.pop(context);
-                        Helpers.launchUri(uri: TextConstants.moreAppsUrl);
                       },
                     ),
                     // Opens the native share sheet to share the app.

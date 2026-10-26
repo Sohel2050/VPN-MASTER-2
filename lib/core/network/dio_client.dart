@@ -168,7 +168,7 @@ class DioClient {
         return NetworkFailure("Could not reach the server (${_short(e.error)}). Check your internet connection.");
       case DioExceptionType.cancel:
         return const UnknownFailure("Request was cancelled.");
-      case DioExceptionType.unknown:
+      default:
         return UnknownFailure("Something went wrong (${_short(e.error)}).");
     }
   }

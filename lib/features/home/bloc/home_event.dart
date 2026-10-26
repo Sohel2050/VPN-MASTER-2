@@ -80,6 +80,9 @@ class TrackVpnStage extends HomeEvent{
 
 /// Dispatched when a connection attempt failed or timed out.
 class ConnectionFailed extends HomeEvent{
+  /// Short text that tells why it failed (shown in the error message).
+  final String reason;
+  ConnectionFailed({this.reason = ""});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [reason];
 }

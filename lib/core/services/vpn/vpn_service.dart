@@ -18,6 +18,12 @@ class VpnService {
   // The OpenVPN engine instance.
   late OpenVPN engine;
 
+  /// The last stage text sent by the OpenVPN engine (used to explain a failure).
+  String lastRawStage = "";
+
+  /// Where the last connect() call is: permission / engine / started (used to explain a failure).
+  String connectPhase = "";
+
   // The WireGuard engine instance.
   final _wireguard = WireGuardFlutter.instance;
 
@@ -37,7 +43,10 @@ class VpnService {
   void initEngine(){
     engine = OpenVPN(
       onVpnStatusChanged: (status) => _statusController.add(status),
-      onVpnStageChanged: (stage, rawStage) => _stageController.add(stage),
+      onVpnStageChanged: (stage, rawStage) {
+        lastRawStage = rawStage;
+        _stageController.add(stage);
+      },
     );
   }
 
@@ -53,17 +62,26 @@ class VpnService {
         localizedDescription: packageInfo.appName, // Shown in VPN permission dialog
       );
     });
-    await _initWireGuard();
+    // WireGuard is NOT started here: its initialize() asks for the Android VPN
+    // permission, and that dialog must only appear when the user taps Connect.
   }
 
-  /// Starts the WireGuard engine. A failure here must never break OpenVPN.
-  Future<void> _initWireGuard() async {
+  // True after WireGuard was initialized successfully (done on the first WireGuard connect).
+  bool _wireguardReady = false;
+  StreamSubscription? _wireguardSub;
+
+  /// Starts the WireGuard engine once, right before the first WireGuard connection.
+  /// The VPN permission was already granted by [requestPermission] at that point,
+  /// so no second dialog appears. A failure here must never break OpenVPN.
+  Future<void> _ensureWireGuard() async {
+    if (_wireguardReady) return;
     try {
       await _wireguard.initialize(interfaceName: 'wg0');
-      _wireguard.vpnStageSnapshot.listen((stage) {
+      _wireguardSub ??= _wireguard.vpnStageSnapshot.listen((stage) {
         final mapped = _mapWireGuardStage(stage.name);
         if (mapped != null) _stageController.add(mapped);
       });
+      _wireguardReady = true;
     } catch (_) {}
   }
 
@@ -117,12 +135,15 @@ class VpnService {
       return "This server has no valid configuration. Please choose another server.";
     }
     try {
+      lastRawStage = "";
+      connectPhase = "permission";
       // Requests necessary permissions before attempting to connect.
       if (!await requestPermission()) {
         return "VPN permission was not granted. Please allow it to connect.";
       }
       _active = protocol;
       if (protocol == VpnProtocol.wireguard) {
+        await _ensureWireGuard();
         final endpoint = _wireGuardEndpoint(config);
         if (endpoint == null || endpoint.isEmpty) {
           return "This WireGuard server has no Endpoint. Please choose another server.";
@@ -134,6 +155,7 @@ class VpnService {
         );
         return null;
       }
+      connectPhase = "engine";
       await engine.connect(
           config,
           country,
@@ -141,6 +163,7 @@ class VpnService {
           password: (password == null || password.isEmpty) ? "vpn" : password,
           certIsRequired: true
       );
+      connectPhase = "started";
       return null;
     } catch (e) {
       return "Could not start the VPN connection. Please try another server.";

@@ -73,7 +73,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
       emit(state.copyWith(vpnStage: event.stage, connectionFailed: false));
     } else if (event.stage == VPNStage.error || event.stage == VPNStage.denied) {
       _connectTimeout?.cancel();
-      add(ConnectionFailed());
+      final raw = VpnService.instance.lastRawStage;
+      add(ConnectionFailed(reason: raw.isNotEmpty ? "Engine: $raw" : "Engine: ${event.stage?.name ?? 'unknown'}"));
     } else if (state.connectionFailed && event.stage != VPNStage.connecting) {
       // Stages that arrive after a failure must not hide the "Failed" label.
       emit(state.copyWith(vpnStage: event.stage));
@@ -90,7 +91,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
     // the VPN engine never answers.
     _connectTimeout?.cancel();
     _connectTimeout = Timer(const Duration(seconds: 45), () {
-      if (state.vpnStage != VPNStage.connected) add(ConnectionFailed());
+      if (state.vpnStage != VPNStage.connected) add(ConnectionFailed(reason: "No answer in 45s, step: ${VpnService.instance.connectPhase}, engine: ${VpnService.instance.lastRawStage.isEmpty ? 'silent' : VpnService.instance.lastRawStage}"));
     });
     final error = await VpnService.instance.connect(
         config: event.config,
@@ -115,10 +116,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
       );
       return;
     }
-    // Many free servers are offline: stop waiting after 15 seconds.
+    // Free servers are often slow to answer (DNS, TLS, far countries): 15 seconds was
+    // too short and cut good connections. Stop waiting after 30 seconds.
     _connectTimeout?.cancel();
-    _connectTimeout = Timer(const Duration(seconds: 15), () {
-      if (state.vpnStage != VPNStage.connected) add(ConnectionFailed());
+    _connectTimeout = Timer(const Duration(seconds: 30), () {
+      if (state.vpnStage != VPNStage.connected) {
+        final raw = VpnService.instance.lastRawStage;
+        add(ConnectionFailed(reason: raw.isNotEmpty ? "Timed out at: $raw" : "Timed out (30s), engine: silent"));
+      }
     });
   }
 
@@ -135,7 +140,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
     ));
     ToastNotifications.showErrorToast(
       title: "Server failed",
-      message: "This server did not connect. Try another server please.",
+      message: event.reason.isEmpty
+          ? "This server did not connect. Try another server please."
+          : "This server did not connect (${event.reason}). Try another server please.",
     );
   }
 
